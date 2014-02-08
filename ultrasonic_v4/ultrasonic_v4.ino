@@ -4,6 +4,8 @@
 
 #include <NewPing.h>
 
+#define LED_PIN 7
+
 //Number of total sensors
 #define SONAR_NUM 3
 
@@ -30,6 +32,26 @@
 
 #define GESTURE_COUNT 10
 
+//FOR STATE VARIABLE
+#define OUTSIDE  0
+#define LEFT_DOWN 1
+#define MIDDLE_DOWN 2
+#define RIGHT_DOWN 3
+#define LEFT_MIDDLE 4
+#define NEUTRAL 5
+#define RIGHT_MIDDLE 6
+#define LEFT_UP 7
+#define MIDDLE_UP 8
+#define RIGHT_UP 9
+#define SPAN_ALL 10
+#define SWIPE_RIGHT 11
+#define SWIPE_LEFT 12
+#define GESTURE 13
+
+//FOR MODE VARIABLE
+#define MOUSE_MODE 0
+#define GAMING_MODE 1
+
 unsigned int counter = 0;
 uint8_t currentSensor = 0; //keep track which sensor is active
 
@@ -50,12 +72,15 @@ boolean sensor0_detected = false;
 boolean sensor1_detected = false;
 boolean sensor2_detected = false;
 
+unsigned int mode = MOUSE_MODE; //0 = mouse navigation/clicking; 1 = for gaming/gesture recognition heavy
+
 unsigned int state = 0; //identifies what information to send based on state
 unsigned int current_state = 0;
 unsigned int previous_state = 0;
 unsigned int resiliency_counter = 0; //only send character if state has been consistent for some time. Avoids noise
 
 boolean click_once = true;
+unsigned int last_clicked = 0;
 unsigned int last_time = 0;
 
 int gesture_array[GESTURE_COUNT];
@@ -63,17 +88,18 @@ int sensor0_array[GESTURE_COUNT];
 int sensor1_array[GESTURE_COUNT];
 int sensor2_array[GESTURE_COUNT];
 
-
 int gesture_counter = 0;
 boolean sweep_leftright = false;
 boolean sweep_rightleft = false;
 boolean gestureCheck = false;
 
-
+int led_state = LOW;
 
 
 void setup() {
   Serial.begin(9600); // Open serial monitor at 9600 baud to see ping results.
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
   pingTimer[0] = millis() + 75;
   for (uint8_t i = 1; i < SONAR_NUM; i++) {
     pingTimer[i] = pingTimer[i-1] + PING_INTERVAL + DELAY;  
@@ -101,6 +127,12 @@ void echoCheck() {
     cm[currentSensor] = sonar[currentSensor].ping_result / US_ROUNDTRIP_CM;
   }  
 }
+
+void changeLED() {
+  led_state = !led_state;
+  digitalWrite(LED_PIN, led_state);
+}
+
 void fullCycle() {
   
   //report_cycle();
@@ -108,8 +140,8 @@ void fullCycle() {
   decipherSensor(); //deciphers the readings of the sensors and writes corresponding message to python script via serial
   gestureRecognition();
   resiliency();
-  //communicate();
-  
+  communicate();
+  check_mode();
   //Serial.println("State:" + String(state));
   //Serial.println("Current State:" + String(current_state));
   //Serial.println();
@@ -119,73 +151,52 @@ void fullCycle() {
 void decipherSensor() {
   //if ( cm[1] != 0) {
  
- if ( current_state == 0 && cm[0] !=0 && cm[1] != 0 && cm[2] != 0) {
-   state = 9;   
+ if ( (current_state == NEUTRAL && cm[0] !=0 && cm[1] != 0 && cm[2] != 0) ||
+       (current_state == SPAN_ALL && cm[0] !=0 && cm[1] != 0 && cm[2] != 0)){
+   state = SPAN_ALL;   
  }  else if ( (cm[1] != 0)) {
-   
-   if (sensor1_detected) {
+     sensor1_detected = true; 
      //if ( cm[1] > UP_THRESHOLD) {
      if ( cm[1] > UP_THRESHOLD && !(cm[1] < previous_cm[1] - MOVEMENT_THRESHOLD) ) {  
-       state = 1;
+       state = MIDDLE_UP;
      } else if ( cm[1] < DOWN_THRESHOLD && !(cm[1]  > previous_cm[1] + MOVEMENT_THRESHOLD) ) { 
-       state = 2;
+       state = MIDDLE_DOWN;
      } else {
-       state = 0;  
+       state = NEUTRAL;  
      }
-   } else { 
-     sensor1_detected = true;
-   }
-   
-   //sensor0_detected = false;
-   //sensor2_detected = false;
-   
- 
  } else if ( (cm[0] == 0) && (cm[2] != 0) ) { //go right
-    if (sensor2_detected) {
-         //if ( cm[1] > UP_THRESHOLD) {
-       if ( cm[2] > UP_THRESHOLD && !(cm[2] < previous_cm[2] - MOVEMENT_THRESHOLD) ) {  
-         state = 5;
-       } else if ( cm[2] < DOWN_THRESHOLD && !(cm[2]  > previous_cm[2] + MOVEMENT_THRESHOLD) ) { 
-         state = 6;
-       } else {
-         state = 8;  
-       }       
-     } else { 
-       sensor2_detected = true;
+     
+    sensor2_detected = true;
+    //if ( cm[1] > UP_THRESHOLD) {
+    if ( cm[2] > UP_THRESHOLD && !(cm[2] < previous_cm[2] - MOVEMENT_THRESHOLD) ) {  
+      state = RIGHT_UP;
+    } else if ( cm[2] < DOWN_THRESHOLD && !(cm[2]  > previous_cm[2] + MOVEMENT_THRESHOLD) ) { 
+       state = RIGHT_DOWN;
+    } else {
+       state = RIGHT_MIDDLE;  
+     }       
+     
+     if (!(sensor0_detected) && !(sensor1_detected)) {
+       sweep_rightleft = true;
      }
    
-   //sensor0_detected = false;
-   //sensor1_detected = false;
- 
- //   } 
  } else if ( (cm[0] != 0) && (cm[2] == 0) ) { //go left
-   if (sensor0_detected) {
-        //if ( cm[1] > UP_THRESHOLD) {
+    sensor0_detected = true;
      if ( cm[0] > UP_THRESHOLD && !(cm[0] < previous_cm[0] - MOVEMENT_THRESHOLD) ) {  
-       state = 3;
+       state = LEFT_UP;
      } else if ( cm[0] < DOWN_THRESHOLD && !(cm[0]  > previous_cm[0] + MOVEMENT_THRESHOLD) ) { 
-       state = 4;
+       state = LEFT_DOWN;
      } else {
-       state = 7;  
-     }
-   } else { 
+       state = LEFT_MIDDLE;  
+     }     
      
-     sensor0_detected = true;
      if (!(sensor1_detected) && !(sensor2_detected)) {
        sweep_leftright = true;
      }
-   }
    
-   //sensor1_detected = false;
-   //sensor2_detected = false;
- 
 
  } else {
-   state = 0;
-   //sensor0_detected = false;
-   //sensor1_detected = false;
-   //sensor2_detected = false;
-       
+   state = OUTSIDE;   
  }
 }
 
@@ -200,7 +211,8 @@ void gestureRecognition() {
   } else {
     int difference_time = millis() - last_time;
     
-    if (state != 0) {
+    //Track all hand movements above sensor. Ignore if outside range
+    if (state != OUTSIDE && mode == GAMING_MODE) {
       gesture_array[gesture_counter] = state;  
       sensor0_array[gesture_counter] = cm[0];
       sensor1_array[gesture_counter] = cm[1];
@@ -211,34 +223,17 @@ void gestureRecognition() {
     if (difference_time > 1000) { //check after every second
         
       //Serial.println("Checking gesture...");
-
-       //printGestureArray();
-       for (int i = 0; i < gesture_counter; i++) {
-       
-         Serial.write(gesture_array[i]);
-         Serial.write(sensor0_array[i]);
-         Serial.write(sensor1_array[i]);
-         Serial.write(sensor2_array[i]);    
-         
-         /*
-         Serial.println(gesture_array[i]);
-         Serial.println(sensor0_array[i]);
-         Serial.println(sensor1_array[i]);
-         Serial.println(sensor2_array[i]);    
-         */
-       }
-       
-       Serial.write('d');
-
-
-   
-      if (sensor0_detected && sensor1_detected && sensor2_detected) {
-        if (sweep_leftright) {
-          state = 10;
-          //Serial.println("Swept Left...");   
-        } else {
-          state = 11;
-          //Serial.println("Swept Right...");     
+       if (mode == GAMING_MODE) {
+         state = GESTURE;
+       } else {
+        if (sensor0_detected && sensor1_detected && sensor2_detected) {
+          if (sweep_leftright) {
+            state = SWIPE_RIGHT;
+            //Serial.println("Swept Left...");   
+          } else if (sweep_rightleft) {
+            state = SWIPE_LEFT;
+            //Serial.println("Swept Right...");     
+          }
         }
         
       }
@@ -247,9 +242,9 @@ void gestureRecognition() {
       sensor1_detected = false; 
       sensor2_detected = false;
       sweep_leftright = false;
+      sweep_rightleft = false;
       
       gestureCheck = false;   
-      gesture_counter = 0;
     }
   } 
     
@@ -261,11 +256,20 @@ void resiliency() {
   } else {
     resiliency_counter = 0;  
   }
- 
-  if (resiliency_counter > RESILIENCY || state == 9 || state == 10 || state == 11 || state == 0) {
-    current_state = state;      
-  }  
+  
+//  if (current_state == SPAN_ALL) {
+//    if (resiliency_counter > RESILIENCY) {
+//      current_state = state;
+//    }  
+//  } else {
+     if (resiliency_counter > RESILIENCY || state == SPAN_ALL ||
+          state == SWIPE_RIGHT || state == SWIPE_LEFT || state == NEUTRAL || state == OUTSIDE) {
+        current_state = state;       
+     }
+//  }
 }
+
+
 void printGestureArray() {
   for (int i = 0; i < gesture_counter; i++) {
     Serial.print(F("Gesture Array: "));
@@ -274,70 +278,112 @@ void printGestureArray() {
   } 
 }
 
-//state 0: send nothing
-//state 1: go up
-//state 2: go down
-//state 3: go up left
-//state 4: go down left
-//state 5: go up right
-//state 6: go down right
-//state 7: go left
-//state 8: go right
-//state 9: click
-//state 10: swept left to right
-//state 11: swept right to left
+/*
+~THE STATES~
+#define OUTSIDE  0
+#define LEFT_DOWN 1
+#define MIDDLE_DOWN 2
+#define RIGHT_DOWN 3
+#define LEFT_MIDDLE 4
+#define NEUTRAL 5
+#define RIGHT_MIDDLE 6
+#define LEFT_UP 7
+#define MIDDLE_UP 8
+#define RIGHT_UP 9
+#define SPAN_ALL 10
+#define SWIPE_RIGHT 11
+#define SWIPE_LEFT 12
+*/
 
 void communicate() {
   
-  switch(current_state) {
-    case 0:
-      break;
-    case 1:
-      Serial.write('A'); //go up
-      break;
-    case 2: 
-      Serial.write('a'); //go down
-      break;
-    case 3:
-      Serial.write('L'); //go up left
-      break;
-    case 4: 
-      Serial.write('l'); //go down left
-      break;
-    case 5: 
-      Serial.write('R'); //go up right
-      break;
-    case 6: 
-      Serial.write('r'); //go down right
-      break;
-    case 7: 
-      Serial.write('c'); //go left
-      break;
-    case 8: 
-      Serial.write('b'); //go right
-      break;
-    case 9:
+  if (mode == MOUSE_MODE) {
+    switch(current_state) {
+      case OUTSIDE:
+        break;
+      case LEFT_DOWN: 
+        Serial.write('l'); //go down left
+        break;
+      case MIDDLE_DOWN: 
+        Serial.write('a'); //go down
+        break;
+      case RIGHT_DOWN: 
+        Serial.write('r'); //go down right
+        break;   
+      case LEFT_MIDDLE: 
+        Serial.write('c'); //go left
+        break;      
+      case NEUTRAL:
+        break;   
+     case RIGHT_MIDDLE: 
+        Serial.write('b'); //go right
+        break;      
+      case LEFT_UP:
+        Serial.write('L'); //go up left
+        break;
+      case MIDDLE_UP:
+        Serial.write('A'); //go up
+        break;  
+      case RIGHT_UP: 
+        Serial.write('R'); //go up right
+        break;
+      case SPAN_ALL:
+        if (!(click_once)) {
+          last_clicked = millis();
+          Serial.write('C');
+          click_once = true;
+        } 
+        break;
+      case SWIPE_RIGHT:
+        Serial.write('x');
+        break;
+      case SWIPE_LEFT:
+        Serial.write('y');
+        break;
+      }
+  } else {
     
-      if (click_once) {
-        Serial.write('C');
-        click_once = false;
-      } 
-      break;
-    
-    case 10:
-      Serial.write('x');
-      break;
-      
-    case 11:
-      Serial.write('y');
-      break;
+     if (current_state == SPAN_ALL) {
+        if (!(click_once)) {
+          last_clicked = millis();
+          Serial.write('C');
+          click_once = true;
+        } 
+     } else if (current_state == GESTURE) {
+      //printGestureArray();
+      for (int i = 0; i < gesture_counter; i++) {
+           Serial.write(gesture_array[i]);
+           Serial.write(sensor0_array[i]);
+           Serial.write(sensor1_array[i]);
+           Serial.write(sensor2_array[i]);    
+           
+           /*
+           Serial.println(gesture_array[i]);
+           Serial.println(sensor0_array[i]);
+           Serial.println(sensor1_array[i]);
+           Serial.println(sensor2_array[i]);    
+           */
+      }
+      Serial.write('d');
+      gesture_counter = 0;
+    } 
   }  
   
-  
-  
-  if (current_state != 9) {
-    click_once = true;  
+}
+
+void check_mode() {
+  if (current_state != SPAN_ALL && click_once) {
+      if (millis() - last_clicked > 5000) {
+      changeLED();
+      if (mode == MOUSE_MODE) {
+        mode = GAMING_MODE;
+      }  else {
+        mode = MOUSE_MODE;
+      }
+    }
+    click_once = false;  
   }  
+
 }
 
 void report_cycle() {
@@ -356,6 +402,7 @@ void report_cycle() {
     counter++;
   // } 
 }
+
 void store_previous() {
     for (uint8_t i = 0; i < SONAR_NUM; i++) {
   // 

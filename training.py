@@ -1,3 +1,4 @@
+import sys
 #Serial connection
 import serial
 #COM_LIST = ['COM3', 'COM4', 'COM5']
@@ -69,7 +70,7 @@ movement = 12
 # shell.SendKeys("{ENTER}")
 # win32api.Sleep(2500)
 
-def main():
+def main(filename):
     
     track_data = 0;
     sensor_data = [];
@@ -84,32 +85,10 @@ def main():
         try:
             message = ser.read()
             current_x, current_y = get_pos()
-            if message == 'A': #go up
-                move(current_x, current_y-movement)
-            elif message == 'a': #go down
-                move(current_x, current_y+movement)
-            elif message == 'R': #go upright
-                move(current_x+movement, current_y-movement)
-            elif message == 'r': #go downright
-                move(current_x+movement, current_y+movement)
-            elif message == 'b': #go right
-                move(current_x+movement, current_y)
-            elif message == 'L': #go upleft
-                move(current_x-movement, current_y-movement)
-            elif message == 'l': #go downleft
-                move(current_x-movement, current_y+movement)
-            elif message == 'c': #go left
-                move(current_x-movement, current_y)
-            elif message == 'C': #click
-                click(current_x, current_y)
-            elif message == 'x':
-                webbrowser.open(url,new=new)
-            elif message == 'y':
-                speech.say("You're Awesome!")
-            elif message == 'd':
+            if message == 'd':
                 #speech.say("Processing!")
-                print "Processing!"
-                process_data(sensor_data);
+                print "Saving!"
+                write_data(sensor_data);
                 sensor_data = []
             else:
                 #print "Track data: " + str(track_data)
@@ -144,8 +123,9 @@ def main():
 # What's being given? All three numbers at the same time
 # What can I do? Plot numbers, calculate all the features
 
-def process_data(array):
+def write_data(array):
     print array
 
 if __name__ == "__main__":
+
     main();
