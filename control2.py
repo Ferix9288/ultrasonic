@@ -133,7 +133,7 @@ def main():
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
-            pass
+            raise
 
 
 #Brainstorm features for classifying features (worth to implement?)
@@ -146,6 +146,8 @@ def main():
 
 def process_data(array):
     print array
+    if (array):
+        calculate_features(array)
 
 if __name__ == "__main__":
     main();

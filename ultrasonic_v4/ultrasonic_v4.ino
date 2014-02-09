@@ -4,6 +4,7 @@
 
 #include <NewPing.h>
 
+#define BUTTON_SWITCH 6
 #define LED_PIN 7
 
 //Number of total sensors
@@ -31,6 +32,7 @@
 #define RESILIENCY 1
 
 #define GESTURE_COUNT 10
+#define GESTURE_TIME 1500
 
 //FOR STATE VARIABLE
 #define OUTSIDE  0
@@ -72,7 +74,7 @@ boolean sensor0_detected = false;
 boolean sensor1_detected = false;
 boolean sensor2_detected = false;
 
-unsigned int mode = MOUSE_MODE; //0 = mouse navigation/clicking; 1 = for gaming/gesture recognition heavy
+unsigned int mode = GAMING_MODE; //0 = mouse navigation/clicking; 1 = for gaming/gesture recognition heavy
 
 unsigned int state = 0; //identifies what information to send based on state
 unsigned int current_state = 0;
@@ -82,6 +84,7 @@ unsigned int resiliency_counter = 0; //only send character if state has been con
 boolean click_once = true;
 unsigned int last_clicked = 0;
 unsigned int last_time = 0;
+unsigned int last_mode = 0;
 
 int gesture_array[GESTURE_COUNT];
 int sensor0_array[GESTURE_COUNT];
@@ -94,10 +97,11 @@ boolean sweep_rightleft = false;
 boolean gestureCheck = false;
 
 int led_state = LOW;
-
+boolean pressed = false;
 
 void setup() {
   Serial.begin(9600); // Open serial monitor at 9600 baud to see ping results.
+  pinMode(BUTTON_SWITCH, INPUT);
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW);
   pingTimer[0] = millis() + 75;
@@ -108,6 +112,17 @@ void setup() {
 }
 
 void loop() {
+  int button = digitalRead(BUTTON_SWITCH);
+  //Serial.println(button);
+  if (button == 0 && !(pressed) && millis() > 200) {
+    pressed = true;
+    last_mode = millis();
+    changeLED();  
+    changeMODE();
+  } else if (button == 1) {
+    pressed = false;
+  }
+  
   for (uint8_t i = 0; i < SONAR_NUM; i++) {
     if (millis() >= pingTimer[i]) {
       pingTimer[i] += (DELAY+PING_INTERVAL) * SONAR_NUM;
@@ -133,18 +148,28 @@ void changeLED() {
   digitalWrite(LED_PIN, led_state);
 }
 
+void changeMODE() {
+  if (mode == MOUSE_MODE) { 
+    mode = GAMING_MODE;
+  } else {
+    mode = MOUSE_MODE;
+  }  
+}
 void fullCycle() {
   
   //report_cycle();
 //  
   decipherSensor(); //deciphers the readings of the sensors and writes corresponding message to python script via serial
+  //Serial.println("State:" + String(state));
+
   gestureRecognition();
   resiliency();
   communicate();
   check_mode();
-  //Serial.println("State:" + String(state));
-  //Serial.println("Current State:" + String(current_state));
-  //Serial.println();
+ // Serial.println("State:" + String(state));
+ // Serial.println("Current State:" + String(current_state));
+ // Serial.println("Mode:" + String(mode));
+ //Serial.println();
   store_previous();
 }
 
@@ -220,11 +245,11 @@ void gestureRecognition() {
       gesture_counter++;
     }
     
-    if (difference_time > 1000) { //check after every second
+    if (difference_time > GESTURE_TIME) { //check after every second
         
       //Serial.println("Checking gesture...");
        if (mode == GAMING_MODE) {
-         state = GESTURE;
+          state = GESTURE;
        } else {
         if (sensor0_detected && sensor1_detected && sensor2_detected) {
           if (sweep_leftright) {
@@ -257,16 +282,10 @@ void resiliency() {
     resiliency_counter = 0;  
   }
   
-//  if (current_state == SPAN_ALL) {
-//    if (resiliency_counter > RESILIENCY) {
-//      current_state = state;
-//    }  
-//  } else {
-     if (resiliency_counter > RESILIENCY || state == SPAN_ALL ||
+  if (resiliency_counter > RESILIENCY || state == SPAN_ALL || state == GESTURE ||
           state == SWIPE_RIGHT || state == SWIPE_LEFT || state == NEUTRAL || state == OUTSIDE) {
         current_state = state;       
-     }
-//  }
+  }
 }
 
 
@@ -372,17 +391,20 @@ void communicate() {
 }
 
 void check_mode() {
-  if (current_state != SPAN_ALL && click_once) {
-      if (millis() - last_clicked > 5000) {
-      changeLED();
-      if (mode == MOUSE_MODE) {
-        mode = GAMING_MODE;
-      }  else {
-        mode = MOUSE_MODE;
-      }
-    }
-    click_once = false;  
-  }  
+  if (current_state != SPAN_ALL) {
+    click_once = false;
+  }
+//  if (current_state != SPAN_ALL && click_once) {
+//      if (millis() - last_clicked > 5000) {
+//      changeLED();
+//      if (mode == MOUSE_MODE) {
+//        mode = GAMING_MODE;
+//      }  else {
+//        mode = MOUSE_MODE;
+//      }
+//    }
+//    click_once = false;  
+//  }  
 
 }
 
