@@ -202,21 +202,21 @@ def main():
 #Vector[5] = overall direction of sensor with max value?
 
 #Works with swipe up, right, down, left, circle
-# weights_unknown = Vector([0, 0, 0, 0, 0], UNKNOWN)
-# weights_swipeRight = Vector([-3, -3, -4, 1, 0], SWIPE_RIGHT)
-# weights_swipeLeft = Vector([3, -2, 1, 4, 2], SWIPE_LEFT)
-# weights_swipeUp = Vector([-1, -1, -2, 3, 1], SWIPE_UP)
-# weights_swipeDown = Vector([0, 0, -1, -6, -3], SWIPE_DOWN)
-# weights_circle = Vector([1, 3, 1, 2, 0], CIRCLE)
+# weights_unknown = Vector([0, 0, 0, 0, 0, 0], UNKNOWN)
+# weights_swipeRight = Vector([-6, -3, 4, 7, 3, -1], SWIPE_RIGHT)
+# weights_swipeLeft = Vector([0, -5, -2, -1, 1, 1], SWIPE_LEFT)
+# weights_swipeUp = Vector([1, -1, -2, -13, 0, 1], SWIPE_UP)
+# weights_swipeDown = Vector([2, 2, 1, -16, 2, -2], SWIPE_DOWN)
+# weights_circle = Vector([2, 2, 0, 1, 1, -1], CIRCLE)
 # weights_heart = Vector([0, 0, 0, 0, 0], HEART)
 # weights_triangle = Vector([0, 0, 0, 0, 0], TRIANGLE)
 
 weights_unknown = Vector([0, 0, 0, 0, 0, 0], UNKNOWN)
-weights_swipeRight = Vector([-7, -5, 6, 5, 0, 4], SWIPE_RIGHT)
-weights_swipeLeft = Vector([9, -5, 0, 7, 0, 2], SWIPE_LEFT)
-weights_swipeUp = Vector([-5, 1, -6, -10, 6, 1], SWIPE_UP)
-weights_swipeDown = Vector([2, 2, 3, -9, -2, -2], SWIPE_DOWN)
-weights_circle = Vector([1, 3, 1, 0, 2, 0], CIRCLE)
+weights_swipeRight = Vector([-6, -3, 4, 7, 3, -1], SWIPE_RIGHT)
+weights_swipeLeft = Vector([0, -5, -2, -1, 1, 1], SWIPE_LEFT)
+weights_swipeUp = Vector([1, -1, -2, -13, 0, 1], SWIPE_UP)
+weights_swipeDown = Vector([2, 2, 1, -16, 2, -2], SWIPE_DOWN)
+weights_circle = Vector([-9, -3, 7, -4, 6, 2], CIRCLE)
 
 
 weights_heart = Vector([0, 0, 0, 0, 0, 0], HEART)
@@ -239,7 +239,7 @@ def process_data(array):
     print array
     gesture, fv = calculate_features(array)
 
-    right_answer = SWIPE_RIGHT
+    right_answer = CIRCLE
 
     print gesture
 
@@ -259,21 +259,15 @@ def update_weights(wrong_gesture, right_gesture, feature_vector):
     right_weights = all_weights[right_gesture]
     for i in range(0, len(wrong_weights.data)):
         if feature_vector.data[i] > 0:
-            #Reduces weight by feature vector
             wrong_weights.data[i] -= feature_vector.data[i]
-        else: #feature vector negative
-            if wrong_weights.data[i] > 0:
-                wrong_weights.data[i] += abs(feature_vector.data[i])
-            else:
-                wrong_weights.data[i] -= abs(feature_vector.data[i])            
+        else:
+            wrong_weights.data[i] += abs(feature_vector.data[i])
+            
     for i in range(0, len(right_weights.data)):
-        if (feature_vector.data[i]) > 0:
+        if feature_vector.data[i] > 0:
             right_weights.data[i] += feature_vector.data[i]
         else:
-            if right_weights.data[i] > 0:
-                right_weights.data[i] -= abs(feature_vector.data[i])
-            else:
-                right_weights.data[i] += abs(feature_vector.data[i])
+            right_weights.data[i] -= abs(feature_vector.data[i])
        
 
 
@@ -294,13 +288,11 @@ def calculate_features(array):
     state_first = first[0]
     state_last = last[0]
 
-    #Vector[0] = starting location? -1 = left, 0 = middle, 1 = right
-    if (state_first == LEFT_DOWN or state_first == LEFT_MIDDLE or state_first == LEFT_UP):
-        feature_vector.add_data(-1)
-    elif (state_first == MIDDLE_DOWN or state_first == NEUTRAL or state_first == MIDDLE_UP):
-        feature_vector.add_data(0)
-    else:
+    #Vector[0] = starting location? -1 = left, 1 = right
+    if (state_first == RIGHT_DOWN or state_first == RIGHT_MIDDLE or state_first == RIGHT_UP):
         feature_vector.add_data(1)
+    else:
+        feature_vector.add_data(-1)
         
     #Vector[1] = Does gesture loop back on itself? (Based on states)
     if (state_first == state_last):
@@ -382,7 +374,11 @@ def calculate_features(array):
     #Vector[4] = What's the overall directions of each sensor? 
     #If sum of directions fall within abs 2, then must likely circle/horizontal swipes
     sum_directions = sensor0_direction + sensor1_direction + sensor2_direction
-    feature_vector.add_data(sum_directions)
+    if (abs(sum_directions) < 2):
+        feature_vector.add_data(1)
+    else:
+        feature_vector.add_data(-1)
+        
 
     #Vector[5] = overall direction of sensor with max value?
     #Positive direction most likely indicate upward swipe
@@ -390,15 +386,23 @@ def calculate_features(array):
 
     #sensor0 = max
     if sensor0_avg >= sensor1_avg and sensor0_avg >= sensor2_avg:
-        feature_vector.add_data(sensor0_direction)
-
+        if sensor0_direction > 0:
+            feature_vector.add_data(1)
+        else:
+            feature_vector.add_data(-1)
+       
     #sensor1 = max
     elif sensor1_avg >= sensor0_avg and sensor1_avg >= sensor2_avg:
-        feature_vector.add_data(sensor1_direction)
-       
+        if sensor1_direction > 0:
+            feature_vector.add_data(1)
+        else:
+            feature_vector.add_data(-1)       
     #sensor2 = max
     elif sensor2_avg >= sensor0_avg and sensor2_avg >= sensor1_avg:
-        feature_vector.add_data(sensor2_direction)
+        if sensor2_direction > 0:
+            feature_vector.add_data(1)
+        else:
+            feature_vector.add_data(-1) 
 
     print feature_vector.get_data()
 
