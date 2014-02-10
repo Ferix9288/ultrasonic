@@ -211,9 +211,9 @@ def main():
 weights_unknown = Vector([0, 0, 0, 0, 0], UNKNOWN)
 weights_swipeRight = Vector([-1, -4, -7, -1, 2], SWIPE_RIGHT)
 weights_swipeLeft = Vector([0, -1, 2, 1, -1], SWIPE_LEFT)
-weights_swipeUp = Vector([1, 1, -2, 4, 0], SWIPE_UP)
+weights_swipeUp = Vector([0, 0, -3, 3, -1], SWIPE_UP)
 weights_swipeDown = Vector([0, 1, 0, -1, 0], SWIPE_DOWN)
-weights_circle = Vector([-1, -1, 1, 1, 0], CIRCLE)
+weights_circle = Vector([1, 1, 3, 2, 0], CIRCLE)
 #heart
 #triangle
 all_weights = []
@@ -229,7 +229,7 @@ def process_data(array):
     print array
     gesture, fv = calculate_features(array)
 
-    right_answer = SWIPE_LEFT
+    right_answer = SWIPE_UP
     if gesture != right_answer and gesture != UNKNOWN:
         print gesture
         update_weights(gesture, right_answer, fv)
