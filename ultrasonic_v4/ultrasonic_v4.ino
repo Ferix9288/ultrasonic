@@ -23,7 +23,7 @@
 #define ECHO3      8
 
 #define MAX_DISTANCE 30 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
-#define PING_INTERVAL 30 //keep track of timing difference among pings of different sensors
+#define PING_INTERVAL 18 //keep track of timing difference among pings of different sensors
 #define DELAY 0
 
 #define UP_THRESHOLD 12 //13 cm and above = up
@@ -31,7 +31,7 @@
 #define MOVEMENT_THRESHOLD 2
 #define RESILIENCY 1
 
-#define GESTURE_COUNT 10
+#define GESTURE_COUNT 20
 #define GESTURE_TIME 1500
 
 //FOR STATE VARIABLE
