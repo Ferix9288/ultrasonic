@@ -367,6 +367,13 @@ void communicate() {
           last_clicked = millis();
           Serial.write('C');
           click_once = true;
+//          gesture_counter = 0;
+//          sensor0_detected = false; 
+//          sensor1_detected = false; 
+//          sensor2_detected = false;
+//          sweep_leftright = false;
+//          sweep_rightleft = false;  
+//          gestureCheck = false;   
         } 
      } else if (current_state == GESTURE) {
       //printGestureArray();

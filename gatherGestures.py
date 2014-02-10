@@ -129,8 +129,7 @@ def main(filename):
 
 def write_data(array, file):
     print array
-    #string = ''.join(str(array))
-    string = ''
+    string = ''.join(str(array))
     file.write(string)
     file.write("\n")
     string = ''

@@ -4,7 +4,7 @@
 #Circle: did it go back to where it was
 
 # What's being given? All three numbers at the same time
-
+# What can I do? Plot numbers, calculate all the features
 
 #Serial connection
 import serial

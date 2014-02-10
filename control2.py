@@ -69,6 +69,57 @@ movement = 12
 # shell.SendKeys("{ENTER}")
 # win32api.Sleep(2500)
 
+#STATES (FROM ARDUINO)
+OUTSIDE = 0
+LEFT_DOWN = 1
+MIDDLE_DOWN = 2
+RIGHT_DOWN = 3
+LEFT_MIDDLE = 4
+NEUTRAL = 5
+RIGHT_MIDDLE = 6
+LEFT_UP = 7
+MIDDLE_UP = 8
+RIGHT_UP = 9
+# SPAN_ALL = 10
+# SWIPE_RIGHT = 11
+# SWIPE_LEFT = 12
+# GESTURE = 13
+
+#TYPES OF GESTURES
+UNKNOWN = 0;
+SWIPE_RIGHT = 1;
+SWIPE_LEFT = 2;
+SWIPE_UP = 3;
+SWIPE_DOWN = 4;
+CIRCLE = 5;
+HEART = 6;
+TRIANGLE = 7;
+FEATURE = 8; #filler
+
+GESTURE = UNKNOWN;
+GESTURE_THRESHOLD = 2
+
+class Vector:
+
+
+    def __init__(self, init_data = [], gesture = UNKNOWN):
+        self.data = init_data
+        self.gesture = gesture
+
+    def dot_product(self, other_vector):
+        if (len(self.data) != len(other_vector.data)):
+            raise "Dot product error! Vector not same size"
+        result = 0;
+        for i in range(0, len(self.data)):
+            result += self.data[i] * other_vector.data[i]
+        return result
+
+    def get_data(self):
+        return self.data
+
+    def add_data(self, i):
+        self.data.append(i)
+
 def main():
     
     track_data = 0;
@@ -128,8 +179,6 @@ def main():
                     new_array = [sensor_state, sensor0_data, sensor1_data, sensor2_data]
                     sensor_data.append(new_array)
                     track_data = 0;
-
-
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
@@ -144,10 +193,168 @@ def main():
 # What's being given? All three numbers at the same time
 # What can I do? Plot numbers, calculate all the features
 
+#Feature Vector
+#Vector[0] = starting location? -1 = left, 0 = middle, 1 = right
+#Vector[1] = Does gesture loop back on itself? (Based on states)
+#Vector[2] = Same as above but calculated based on sensor values
+#Vector[3] = What's the overall directions of each sensor? 
+#Vector[4] = overall direction of sensor with max value?
+weights_swipeRight = Vector([1, -1, -2, 1, 0], SWIPE_RIGHT)
+weights_swipeLeft = Vector([-1, -1, -2, 1, 0], SWIPE_LEFT)
+weights_swipeUp = Vector([0, -1, -2, 0, 1], SWIPE_UP)
+weights_swipeDown = Vector([0, -1, -2, 0, -1], SWIPE_DOWN)
+weights_circle = Vector([0, 1, 3, 1, 0], CIRCLE)
+all_weights = []
+all_weights.append(weights_swipeRight)
+all_weights.append(weights_swipeLeft)
+all_weights.append(weights_swipeUp)
+all_weights.append(weights_swipeDown)
+all_weights.append(weights_circle)
+    
 def process_data(array):
     print array
-    if (array):
-        calculate_features(array)
+    gesture = calculate_features(array)
+
+    if gesture == UNKNOWN:
+        print "UNKNOWN!"
+    elif gesture == SWIPE_RIGHT:
+        print "Swipe Right!"
+    elif gesture == SWIPE_LEFT:
+        print "Swipe Left!"
+
+
+    #based on gesture, do something
+
+def calculate_features(array):
+    feature_vector = Vector([], UNKNOWN);
+    gesture = UNKNOWN
+    if (len(array) < 2):
+        return gesture
+
+    first = array[0] 
+    last = array[len(array)-1]
+
+    state_first = first[0]
+    state_last = last[0]
+
+    #Vector[0] = starting location? -1 = left, 0 = middle, 1 = right
+    if (state_first == LEFT_DOWN or state_first == LEFT_MIDDLE or state_first == LEFT_UP):
+        feature_vector.add_data(-1)
+    elif (state_first == MIDDLE_DOWN or state_first == NEUTRAL or state_first == MIDDLE_UP):
+        feature_vector.add_data(0)
+    else:
+        feature_vector.add_data(1)
+        
+    #Vector[1] = Does gesture loop back on itself? (Based on states)
+    if (state_first == state_last):
+        feature_vector.add_data(1)
+    else:
+        feature_vector.add_data(-1)
+
+    #Vector[2] = Same as above but calculated based on sensor values
+    diff = total_difference(first, last)
+    if (diff < 8):
+        feature_vector.add_data(1)
+    else:
+        feature_vector.add_data(-1)
+
+    #Average values for sensor0, sensor1, sensor2
+    #Positive values for direction = increasing
+    #Negative = decreasing, 0 = neutral
+    sensor0_avg = first[1]
+    sensor0_direction = 0
+    previous_sensor0 = first[1]
+    
+    sensor1_avg = first[2]
+    sensor1_direction = 0
+    previous_sensor1 = first[2]
+
+    sensor2_avg = first[3]
+    sensor2_direction = 0
+    previous_sensor2 = first[3]
+
+    for i in range(1, len(array)):
+        sensor0_avg += array[i][1]
+        sensor1_avg += array[i][2]
+        sensor2_avg += array[i][3]
+
+        if (array[i][1] > previous_sensor0):
+            sensor0_direction += 1
+        elif (array[i][1] < previous_sensor0):
+            sensor0_direction -= 1
+        
+        if (array[i][2] > previous_sensor1):
+            sensor1_direction += 1
+        elif (array[i][2] < previous_sensor1):
+            sensor1_direction -= 1
+
+        if (array[i][3] > previous_sensor2):
+            sensor2_direction += 1
+        elif (array[i][3] < previous_sensor2):
+            sensor2_direction -= 1
+        
+        previous_sensor0 = array[i][1]
+        previous_sensor1 = array[i][2]
+        previous_sensor2 = array[i][3]
+
+    sensor0_avg = sensor0_avg / len(array)
+    sensor1_avg = sensor1_avg / len(array)
+    sensor2_avg = sensor2_avg / len(array)
+
+    print "sensor0_avg: " + str(sensor0_avg)
+    print "sensor1_avg: " + str(sensor1_avg)
+    print "sensor2_avg: " + str(sensor2_avg)
+
+    print "sensor0_dir: " + str(sensor0_direction)
+    print "sensor1_dir: " + str(sensor1_direction)
+    print "sensor2_dir: " + str(sensor2_direction)
+
+    #Vector[3] = What's the overall directions of each sensor? 
+    #If sum of directions fall within abs 2, then must likely circle/horizontal swipes
+    sum_directions = sensor0_direction + sensor1_direction + sensor2_direction
+    feature_vector.add_data(sum_directions)
+
+    #Vector[4] = overall direction of sensor with max value?
+    #Positive direction most likely indicate upward swipe
+    #Negative Direction most likely indicate downward swipe
+
+    #sensor0 = max
+    if sensor0_avg >= sensor1_avg and sensor0_avg >= sensor2_avg:
+        feature_vector.add_data(sensor0_direction)
+
+    #sensor1 = max
+    elif sensor1_avg >= sensor0_avg and sensor1_avg >= sensor2_avg:
+        feature_vector.add_data(sensor1_direction)
+       
+    #sensor2 = max
+    elif sensor2_avg >= sensor0_avg and sensor2_avg >= sensor1_avg:
+        feature_vector.add_data(sensor2_direction)
+
+    print feature_vector.get_data()
+
+
+    #Calculate weights
+    current_max = float("-inf")
+    index_max = 0
+    index = 0
+    for weight in all_weights:
+        dot_product = weight.dot_product(feature_vector)
+        print "DOT PRODUCT " + str(index) + ": " + str(dot_product)
+        if dot_product > current_max:
+            current_max = dot_product
+            index_max = index
+        index += 1 
+
+    gesture = all_weights[index_max].gesture
+    if (abs(gesture) < GESTURE_THRESHOLD):
+        return UNKNOWN
+    return gesture
+
+def total_difference(array1, array2):
+    total = 0;
+    for i in range(1, len(array1)):
+        total += abs(array1[i]-array2[i])
+    return total
 
 if __name__ == "__main__":
     main();
