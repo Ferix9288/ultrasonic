@@ -197,23 +197,31 @@ def main():
 #Vector[0] = starting location? -1 = left, 0 = middle, 1 = right
 #Vector[1] = Does gesture loop back on itself? (Based on states)
 #Vector[2] = Same as above but calculated based on sensor values
-#Vector[3] = What's the overall directions of each sensor? 
-#Vector[4] = overall direction of sensor with max value?
+#Vector[3] = Does gesture loop hit all sensors? (Based on values)
+#Vector[4] = What's the overall directions of each sensor? 
+#Vector[5] = overall direction of sensor with max value?
 
-#Works with swipe up, right, down, left
+#Works with swipe up, right, down, left, circle
 # weights_unknown = Vector([0, 0, 0, 0, 0], UNKNOWN)
-# weights_swipeRight = Vector([-1, -4, -7, -1, 2], SWIPE_RIGHT)
-# weights_swipeLeft = Vector([0, -1, 2, 1, -1], SWIPE_LEFT)
-# weights_swipeUp = Vector([1, 1, -2, 4, 0], SWIPE_UP)
-# weights_swipeDown = Vector([0, 1, 0, -1, 0], SWIPE_DOWN)
-# weights_circle = Vector([-1, -1, 1, 1, 0], CIRCLE)
+# weights_swipeRight = Vector([-3, -3, -4, 1, 0], SWIPE_RIGHT)
+# weights_swipeLeft = Vector([3, -2, 1, 4, 2], SWIPE_LEFT)
+# weights_swipeUp = Vector([-1, -1, -2, 3, 1], SWIPE_UP)
+# weights_swipeDown = Vector([0, 0, -1, -6, -3], SWIPE_DOWN)
+# weights_circle = Vector([1, 3, 1, 2, 0], CIRCLE)
+# weights_heart = Vector([0, 0, 0, 0, 0], HEART)
+# weights_triangle = Vector([0, 0, 0, 0, 0], TRIANGLE)
 
-weights_unknown = Vector([0, 0, 0, 0, 0], UNKNOWN)
-weights_swipeRight = Vector([-1, -4, -7, -1, 2], SWIPE_RIGHT)
-weights_swipeLeft = Vector([0, -1, 2, 1, -1], SWIPE_LEFT)
-weights_swipeUp = Vector([0, 0, -3, 3, -1], SWIPE_UP)
-weights_swipeDown = Vector([0, 1, 0, -1, 0], SWIPE_DOWN)
-weights_circle = Vector([1, 1, 3, 2, 0], CIRCLE)
+weights_unknown = Vector([0, 0, 0, 0, 0, 0], UNKNOWN)
+weights_swipeRight = Vector([-7, -5, 6, 5, 0, 4], SWIPE_RIGHT)
+weights_swipeLeft = Vector([9, -5, 0, 7, 0, 2], SWIPE_LEFT)
+weights_swipeUp = Vector([-5, 1, -6, -10, 6, 1], SWIPE_UP)
+weights_swipeDown = Vector([2, 2, 3, -9, -2, -2], SWIPE_DOWN)
+weights_circle = Vector([1, 3, 1, 0, 2, 0], CIRCLE)
+
+
+weights_heart = Vector([0, 0, 0, 0, 0, 0], HEART)
+weights_triangle = Vector([0, 0, 0, 0, 0, 0], TRIANGLE)
+
 #heart
 #triangle
 all_weights = []
@@ -223,17 +231,22 @@ all_weights.append(weights_swipeLeft)
 all_weights.append(weights_swipeUp)
 all_weights.append(weights_swipeDown)
 all_weights.append(weights_circle)
+#all_weights.append(weights_heart)
+#all_weights.append(weights_triangle)
     
 
 def process_data(array):
     print array
     gesture, fv = calculate_features(array)
 
-    right_answer = SWIPE_UP
+    right_answer = SWIPE_RIGHT
+
+    print gesture
+
     if gesture != right_answer and gesture != UNKNOWN:
-        print gesture
         update_weights(gesture, right_answer, fv)
         print "UPDATED WEIGHTS!"
+    print "Length of processed: " + str(len(array)) 
     print_weights()
 
 def print_weights():
@@ -245,9 +258,23 @@ def update_weights(wrong_gesture, right_gesture, feature_vector):
     wrong_weights = all_weights[wrong_gesture]
     right_weights = all_weights[right_gesture]
     for i in range(0, len(wrong_weights.data)):
-        wrong_weights.data[i] -= feature_vector.data[i]
+        if feature_vector.data[i] > 0:
+            #Reduces weight by feature vector
+            wrong_weights.data[i] -= feature_vector.data[i]
+        else: #feature vector negative
+            if wrong_weights.data[i] > 0:
+                wrong_weights.data[i] += abs(feature_vector.data[i])
+            else:
+                wrong_weights.data[i] -= abs(feature_vector.data[i])            
     for i in range(0, len(right_weights.data)):
-        right_weights.data[i] += feature_vector.data[i]
+        if (feature_vector.data[i]) > 0:
+            right_weights.data[i] += feature_vector.data[i]
+        else:
+            if right_weights.data[i] > 0:
+                right_weights.data[i] -= abs(feature_vector.data[i])
+            else:
+                right_weights.data[i] += abs(feature_vector.data[i])
+       
 
 
 
@@ -288,6 +315,7 @@ def calculate_features(array):
     else:
         feature_vector.add_data(-1)
 
+
     #Average values for sensor0, sensor1, sensor2
     #Positive values for direction = increasing
     #Negative = decreasing, 0 = neutral
@@ -327,10 +355,19 @@ def calculate_features(array):
         previous_sensor1 = array[i][2]
         previous_sensor2 = array[i][3]
 
+    #Before averaging and dividing the values (don't want to deal with floats)
+    #Vector[3] = Does gesture loop hit all sensors? (Based on values)
+    if (sensor0_avg != 0 and sensor1_avg != 0 and sensor2_avg != 0):
+        feature_vector.add_data(1)
+    else:
+        feature_vector.add_data(-1)
+
     sensor0_avg = sensor0_avg / len(array)
     sensor1_avg = sensor1_avg / len(array)
     sensor2_avg = sensor2_avg / len(array)
 
+
+    
     print "sensor0_avg: " + str(sensor0_avg)
     print "sensor1_avg: " + str(sensor1_avg)
     print "sensor2_avg: " + str(sensor2_avg)
@@ -339,12 +376,15 @@ def calculate_features(array):
     print "sensor1_dir: " + str(sensor1_direction)
     print "sensor2_dir: " + str(sensor2_direction)
 
-    #Vector[3] = What's the overall directions of each sensor? 
+   
+  
+
+    #Vector[4] = What's the overall directions of each sensor? 
     #If sum of directions fall within abs 2, then must likely circle/horizontal swipes
     sum_directions = sensor0_direction + sensor1_direction + sensor2_direction
     feature_vector.add_data(sum_directions)
 
-    #Vector[4] = overall direction of sensor with max value?
+    #Vector[5] = overall direction of sensor with max value?
     #Positive direction most likely indicate upward swipe
     #Negative Direction most likely indicate downward swipe
 
@@ -368,6 +408,9 @@ def calculate_features(array):
     index_max = 0
     index = 0
     for weight in all_weights:
+        if index == 0:
+            index += 1 
+            continue
         dot_product = weight.dot_product(feature_vector)
         print "DOT PRODUCT " + str(index) + ": " + str(dot_product)
         if dot_product > current_max:
@@ -376,7 +419,7 @@ def calculate_features(array):
         index += 1 
 
     gesture = all_weights[index_max].gesture
-    if (abs(gesture) < GESTURE_THRESHOLD):
+    if (abs(current_max) < GESTURE_THRESHOLD):
         return UNKNOWN, feature_vector
     return gesture, feature_vector
 
