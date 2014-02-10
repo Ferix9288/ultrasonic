@@ -93,8 +93,9 @@ SWIPE_DOWN = 3;
 CIRCLE = 4;
 HEART = 5;
 TRIANGLE = 6;
-UNKNOWN = 7;
-FEATURE = 8; #filler
+V = 7;
+UNKNOWN = 8;
+FEATURE = 9; #filler
 
 GESTURE = UNKNOWN;
 GESTURE_THRESHOLD = 2
@@ -205,20 +206,20 @@ def main():
 #Vector[8] = overall direction of sensor with max value?
 
 #Works with swipe up, right, down, left, circle
-# weights_swipeRight = Vector([-6, -3, 4, 7, 3, -1], SWIPE_RIGHT)
-# weights_swipeLeft = Vector([0, -5, -2, -1, 1, 1], SWIPE_LEFT)
-# weights_swipeUp = Vector([1, -1, -2, -13, 0, 1], SWIPE_UP)
-# weights_swipeDown = Vector([2, 2, 1, -16, 2, -2], SWIPE_DOWN)
-# weights_circle = Vector([2, 2, 0, 1, 1, -1], CIRCLE)
+# weights_swipeRight = Vector([-7, 13, 0, 0, 0, -2, 1, 0, 0], SWIPE_RIGHT)
+# weights_swipeLeft = Vector([13, -5, 0, 0, 0, 0, 0, 1, 0], SWIPE_LEFT)
+# weights_swipeUp = Vector([0, 0, -5, 3, -2, 0, -6, -3, 10], SWIPE_UP)
+# weights_swipeDown = Vector([0, 0, 4, -6, 0, 0, -6, -4, -9], SWIPE_DOWN)
+# weights_circle = Vector([0, 0, 0, 0, 1, 0, -5, 10, 1], CIRCLE)
 # weights_heart = Vector([0, 0, 0, 0, 0], HEART)
 # weights_triangle = Vector([0, 0, 0, 0, 0], TRIANGLE)
 
-weights_swipeRight = Vector([-7, 13, 0, 0, 0, -2, 1, 0, 0], SWIPE_RIGHT)
-weights_swipeLeft = Vector([13, -5, 0, 0, 0, 0, 0, 1, 0], SWIPE_LEFT)
+weights_swipeRight = Vector([-9, 9, 0, 0, 0, 0, 0, 0, 0], SWIPE_RIGHT)
+weights_swipeLeft = Vector([10, -8, 0, 0, 0, 0, 0, 0, 0], SWIPE_LEFT)
 weights_swipeUp = Vector([0, 0, -5, 3, -2, 0, -6, -3, 10], SWIPE_UP)
 weights_swipeDown = Vector([0, 0, 4, -6, 0, 0, -6, -4, -9], SWIPE_DOWN)
-weights_circle = Vector([0, 0, 0, 0, 1, 0, -5, 1, 1], CIRCLE)
-
+weights_circle = Vector([0, 0, 0, 0, 0, 10, -6, 7, 0], CIRCLE)
+weights_v = Vector([0, 0, 10, 10, 0, 0, 0, 0, 0], V)
 
 weights_heart = Vector([0, 0, 0, 0, 0, 0], HEART)
 weights_triangle = Vector([0, 0, 0, 0, 0, 0], TRIANGLE)
@@ -231,6 +232,8 @@ all_weights.append(weights_swipeLeft)
 all_weights.append(weights_swipeUp)
 all_weights.append(weights_swipeDown)
 all_weights.append(weights_circle)
+#all_weights.append(weights_v)
+
 #all_weights.append(weights_heart)
 #all_weights.append(weights_triangle)
     
@@ -287,12 +290,16 @@ def calculate_features(array):
     state_last = last[0]
 
     #Vector[0] = starting location? -1 = left, 1 = right
+    which_sensor = 1
     if (state_first == RIGHT_DOWN or state_first == RIGHT_MIDDLE or state_first == RIGHT_UP):
         feature_vector.add_data(1)
+        which_sensor = 3 #Right sensor
     elif state_first == MIDDLE_DOWN or state_first == NEUTRAL or state_first == MIDDLE_UP:
         feature_vector.add_data(0)
+        which_sensor = 2 #Middle sensor
     else:
         feature_vector.add_data(-1)
+        which_sensor = 1 #Left Sensor
 
     #Vector[1] = end location? -1 = left, 0 = neutral, 1 =  right
     if (state_last == RIGHT_DOWN or state_last == RIGHT_MIDDLE or state_last == RIGHT_UP):
@@ -325,9 +332,12 @@ def calculate_features(array):
         feature_vector.add_data(-1)
 
     #Vector[5] = Same as above but calculated based on sensor values
-    diff = total_difference(first, last)
-    if (diff < 8):
-        feature_vector.add_data(1)
+    #Difference only based on one sensor
+    diff = sensor_difference(first, last, which_sensor)
+    if diff  == -1:
+        feature_vector.add_data(0)
+    elif diff < 9:
+        feature_vector.add_data(1)   
     else:
         feature_vector.add_data(-1)
 
@@ -387,8 +397,6 @@ def calculate_features(array):
     sensor1_avg = sensor1_avg / len(array)
     sensor2_avg = sensor2_avg / len(array)
 
-
-    
     print "sensor0_avg: " + str(sensor0_avg)
     print "sensor1_avg: " + str(sensor1_avg)
     print "sensor2_avg: " + str(sensor2_avg)
@@ -430,8 +438,9 @@ def calculate_features(array):
         else:
             feature_vector.add_data(-1) 
 
-    print feature_vector.get_data()
 
+    print feature_vector.get_data()
+    print "ADJUSTING FEATURE: " + str(feature_vector.get_data()[5])
 
     #Calculate weights
     current_max = float("-inf")
@@ -450,11 +459,32 @@ def calculate_features(array):
         return UNKNOWN, feature_vector
     return gesture, feature_vector
 
-def total_difference(array1, array2):
+def sensor_difference(array1, array2, which_sensor):
     total = 0;
-    for i in range(1, len(array1)):
-        total += abs(array1[i]-array2[i])
-    return total
+    diff = abs(array1[which_sensor] - array2[which_sensor])
+    if array2[which_sensor] != 0:
+        return diff
+    else:
+        if which_sensor == 1:
+            if array2[2] != 0:
+                diff = abs(array1[which_sensor] - array2[2])
+            else:
+                diff = -1
+        elif which_sensor == 2:
+            if array2[1] != 0:
+                diff = abs(array1[which_sensor] - array2[1])
+            elif array2[3] != 0:
+                diff = abs(array1[which_sensor] - array2[3])
+            else:
+                diff = -1
+        elif which_sensor == 3:
+            if array2[2] != 0:
+                diff = abs(array1[which_sensor] - array2[2])
+            else:
+                diff = -1
+        else:
+            diff = -1
+    return diff
 
 if __name__ == "__main__":
     main();
