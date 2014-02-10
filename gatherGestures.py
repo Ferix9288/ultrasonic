@@ -70,9 +70,9 @@ movement = 12
 # shell.SendKeys("{ENTER}")
 # win32api.Sleep(2500)
 
-def main(filename):
+def main(name):
     
-    filename = filename + ".txt"
+    filename = name + ".txt"
     f = open(filename, "w")
 
     track_data = 0;
@@ -91,7 +91,7 @@ def main(filename):
             if message == 'd':
                 #speech.say("Processing!")
                 print "Saving!"
-                write_data(sensor_data, f);
+                write_data(sensor_data, f, name);
                 sensor_data = []
             else:
                 #print "Track data: " + str(track_data)
@@ -127,12 +127,12 @@ def main(filename):
 # What's being given? All three numbers at the same time
 # What can I do? Plot numbers, calculate all the features
 
-def write_data(array, file):
+def write_data(array, file, name):
     print array
-    string = ''.join(str(array))
+    string = str(array)[1:-1]
+    string += ", " + name
     file.write(string)
     file.write("\n")
-    string = ''
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
