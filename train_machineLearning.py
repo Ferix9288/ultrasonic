@@ -14,7 +14,7 @@ for f in glob.glob("data\*.txt"):
     opened_file = open(f, "r")
     all_files.append(opened_file)
 print all_files
-sys.exit(1)
+
 #STATES (FROM ARDUINO)
 OUTSIDE = 0
 LEFT_DOWN = 1

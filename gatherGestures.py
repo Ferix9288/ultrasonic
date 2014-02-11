@@ -82,7 +82,7 @@ def main(name):
     sensor0 = 0;
     sensor1 = 0;
     sensor2 = 0;
-
+    count = 0
     while(True):
         #print current_x, current_y
         try:
@@ -90,7 +90,8 @@ def main(name):
             current_x, current_y = get_pos()
             if message == 'd':
                 #speech.say("Processing!")
-                print "Saving!"
+                print "Saving! " + str(count)
+                count += 1
                 write_data(sensor_data, f, name);
                 sensor_data = []
             else:
