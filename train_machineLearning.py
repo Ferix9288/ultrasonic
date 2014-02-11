@@ -34,10 +34,12 @@ SWIPE_UP = 2;
 SWIPE_DOWN = 3;
 CIRCLE = 4;
 V = 5;
-HEART = 6;
-TRIANGLE = 6;
-UNKNOWN = 8;
-FEATURE = 9; #filler
+CARET = 6;
+TRIANGLE = 7;
+
+HEART = 8;
+UNKNOWN = 9;
+FEATURE = 10; #filler
 
 GESTURE = UNKNOWN;
 GESTURE_THRESHOLD = 2
@@ -134,6 +136,7 @@ def main():
 #Vector[6] = Does gesture loop hit all sensors? (Based on values)
 #Vector[7] = What's the overall directions of each sensor? 
 #Vector[8] = overall direction of sensor with max value?
+#Vector[9] = 1 if large range of motion, -1 otherwise
 
 #Works with swipe up, right, down, left, circle
 # weights_swipeRight = Vector([-7, 13, 0, 0, 0, -2, 1, 0, 0], SWIPE_RIGHT)
@@ -150,9 +153,10 @@ weights_swipeUp = Vector([0, 0, -5, 3, -2, -2, 0, -3, 10, 2], SWIPE_UP)
 weights_swipeDown = Vector([0, 0, 4, -6, 0, -2, 0, -4, -9, 2], SWIPE_DOWN)
 weights_circle = Vector([0, 0, 0, 0, 0, 8, -6, 7, 0, 4], CIRCLE)
 weights_v = Vector([0, 0, 10, 10, 0, -4, 3, 0, 0, 4], V)
+weights_caret = Vector([0, 0, -10, -10, 0, -4, 3, 0, 0, 4], CARET)
+weights_triangle = Vector([0, 0, 0, 0, 3, 9, 4, 2, 0, 4), TRIANGLE)
 
-weights_heart = Vector([0, 0, 0, 0, 0, 0], HEART)
-weights_triangle = Vector([0, 0, 0, 0, 0, 0], TRIANGLE)
+#weights_heart = Vector([0, 0, 0, 0, 0, 0], HEART)
 
 #heart
 #triangle
@@ -163,6 +167,9 @@ all_weights.append(weights_swipeUp)
 all_weights.append(weights_swipeDown)
 all_weights.append(weights_circle)
 all_weights.append(weights_v)
+all_weights.append(weights_caret)
+all_weights.append(weights_triangle)
+
 
 #all_weights.append(weights_heart)
 #all_weights.append(weights_triangle)
