@@ -11,7 +11,6 @@ for f in glob.glob("*.txt"):
     opened_file = open(f, "r")
     all_files.append(opened_file)
 print all_files
-sys.exit(1)
 
 #STATES (FROM ARDUINO)
 OUTSIDE = 0
@@ -114,7 +113,7 @@ def main():
                 right_gesture = SWIPE_DOWN
             elif gesture_type == "swipeRight":
                 right_gesture = SWIPE_RIGHT
-            elif gesture_type == "swieLeft":
+            elif gesture_type == "swipeLeft":
                 right_gesture = SWIPE_LEFT
             elif gesture_type == "circles":
                 right_gesture = CIRCLE
