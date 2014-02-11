@@ -11,7 +11,7 @@ for f in glob.glob("*.txt"):
     opened_file = open(f, "r")
     all_files.append(opened_file)
 print all_files
-
+sys.exit(1)
 
 #STATES (FROM ARDUINO)
 OUTSIDE = 0
@@ -124,6 +124,7 @@ def main():
                 right_gesture = CARET
             elif gesture_type == "triangle":
                 right_gesture = TRIANGLE
+
 
             cl.learning(sensor_data, right_gesture);
 

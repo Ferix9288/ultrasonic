@@ -108,6 +108,7 @@ class Classifier:
     def classifying_data(self, array):
         print array
         gesture, fv = self.calculate_features(array)
+        self.print_weights()
         return gesture
 
     def learning(self, array, right_answer):
@@ -245,6 +246,9 @@ class Classifier:
             sensor1_total += array[i][2]
             sensor2_total += array[i][3]
 
+            if i == len(array)/2:
+                middle = array[i]
+
             if (array[i][0]) != previous_state:
                 fluctunate_states += 1
 
@@ -306,6 +310,7 @@ class Classifier:
         print "fluctunate_states: " + str(fluctunate_states)
         print "max seen: " + str(max_seen)
         print "min seen: " + str(min_seen)
+        print "middle: " + str(middle)
 
         #Before averaging and dividing the values (don't want to deal with floats)
         #Vector[6] = Does gesture loop hit all sensors? (Based on values)
