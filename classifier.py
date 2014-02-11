@@ -28,10 +28,7 @@ class Classifier:
                 index_max = index
             index += 1 
         gesture = self.all_weights[index_max].gesture
-        if (abs(current_max) < GESTURE_THRESHOLD):
-            return UNKNOWN
-        else:
-            return gesture
+        return gesture
     
     def classifying_data(self, array):
         print array

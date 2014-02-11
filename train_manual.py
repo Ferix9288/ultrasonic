@@ -3,8 +3,6 @@ from classifier import *
 import feature_calculator
 from feature_calculator import *
 #INSERT CURRENT GESTURE HERE
-right_gesture = SWIPE_DOWN
-
 
 #Serial connection
 import serial
@@ -101,6 +99,7 @@ def main():
             elif message == 'd':
                 #speech.say("Processing!")
                 print "Processing!"
+                right_gesture = int(input("Enter:"))
                 cl.learning(sensor_data, right_gesture);
                 sensor_data = []
             else:

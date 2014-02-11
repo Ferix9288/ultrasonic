@@ -23,7 +23,7 @@
 #define ECHO3      8
 
 #define MAX_DISTANCE 30 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
-#define PING_INTERVAL 18 //keep track of timing difference among pings of different sensors
+#define PING_INTERVAL 22 //keep track of timing difference among pings of different sensors
 #define DELAY 0
 
 #define UP_THRESHOLD 12 //13 cm and above = up
@@ -232,6 +232,13 @@ void gestureRecognition() {
     if (sensor0_detected || sensor1_detected || sensor2_detected) {
       gestureCheck = true;
       last_time = millis();
+      if (state != OUTSIDE && mode == GAMING_MODE && gesture_counter < GESTURE_COUNT) {
+        gesture_array[gesture_counter] = state;  
+        sensor0_array[gesture_counter] = cm[0];
+        sensor1_array[gesture_counter] = cm[1];
+        sensor2_array[gesture_counter] = cm[2];
+        gesture_counter++;
+      }
     }
   } else {
     int difference_time = millis() - last_time;

@@ -87,6 +87,7 @@ def main():
             text = f.readline()
             if not(text):
                 f.close()
+                print "REMOVING: " + str(f) 
                 all_files.remove(f)
                 if not(all_files):
                     sys.exit(1)

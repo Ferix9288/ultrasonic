@@ -157,7 +157,7 @@ def gesture_handling(gesture):
     elif gesture == CARET:
         speech.say("You drew a caret. Phenomenal!")
     elif gesture == TRIANGLE:
-        speech.say("You drew a caret. Wow!")
+        speech.say("You drew a triangle. Wow!")
 
 
 if __name__ == "__main__":

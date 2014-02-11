@@ -117,10 +117,23 @@ class FeatureCalculator:
     #Vector[9] = 1 if large range of motion, -1 otherwise
     #Distinguish between horizontal swipes vs circles
     def range(self, feature_vector, max_seen, min_seen):
-        if (max_seen - min_seen) < 8:
+        if (max_seen - min_seen) <= RANGE_THRESHOLD:
             feature_vector.add_data(-1)
         else:
             feature_vector.add_data(1)
+
+    #Vector[10] = See how close the start and end are in terms of vertical range
+    def mirrored(self, feature_vector, start, end):
+        if feature_vector.data[0] != feature_vector.data[1]:
+            max_start = max(start[1:])
+            max_end = max(end[1:])
+            diff = abs(max_start - max_end)
+            if diff <= RANGE_THRESHOLD:
+                feature_vector.add_data(-1)
+            else:
+                feature_vector.add_data(1)
+        else:
+            feature_vector.add_data(0)
 
     def calculate_features(self, array):
         feature_vector = Vector([], UNKNOWN);
@@ -178,6 +191,12 @@ class FeatureCalculator:
         max_seen = float("-inf")
         min_seen = float("inf")
 
+        compensate_max_noise = 0
+        compensate_min_noise = 0
+
+        set_first_max = False
+        set_first_min = False
+
         for i in range(1, len(array)):
             sensor0_total += array[i][1]
             sensor1_total += array[i][2]
@@ -191,27 +210,51 @@ class FeatureCalculator:
 
             if (array[i][1] != 0):
                 if array[i][1] > max_seen:
-                    max_seen = array[i][1]
-                
+                    if (not set_first_max):
+                        max_seen = array[i][1]
+                        set_first_max = True 
+                    elif compensate_max_noise > NOISE_MAX_THRESHOLD:
+                        max_seen = array[i][1]
+                    else:
+                        compensate_max_noise += 1
+
                 if array[i][1] < min_seen:
-                    min_seen = array[i][1]     
+                    if (not set_first_min):                        
+                       min_seen = array[i][1]  
+                       set_first_min = True   
+                    elif compensate_min_noise > NOISE_MIN_THRESHOLD:
+                        min_seen = array[i][1]
+                    else:
+                        compensate_min_noise += 1
 
                 if (array[i][1] > previous_sensor0):
                     sensor0_direction += 1
                 elif (array[i][1] < previous_sensor0):
                     sensor0_direction -= 1
-
                 previous_sensor0 = array[i][1]
+
             else:
                 actual_sensor0 -= 1
 
-            if (array[i][2]!=0):     
+            if (array[i][2] != 0):
 
                 if array[i][2] > max_seen:
-                    max_seen = array[i][2]
-                
+                    if (not set_first_max):
+                        max_seen = array[i][2]
+                        set_first_max = True 
+                    elif compensate_max_noise > NOISE_MAX_THRESHOLD:
+                        max_seen = array[i][2]
+                    else:
+                        compensate_max_noise += 1
+
                 if array[i][2] < min_seen:
-                    min_seen = array[i][2]     
+                    if (not set_first_min):                        
+                       min_seen = array[i][2]  
+                       set_first_min = True   
+                    elif compensate_min_noise > NOISE_MIN_THRESHOLD:
+                        min_seen = array[i][2]
+                    else:
+                        compensate_min_noise += 1
 
        
                 if (array[i][2] > previous_sensor1):
@@ -227,10 +270,22 @@ class FeatureCalculator:
             if (array[i][3]!=0):                        
         
                 if array[i][3] > max_seen:
-                    max_seen = array[i][3]
-                
+                    if (not set_first_max):
+                        max_seen = array[i][3]
+                        set_first_max = True 
+                    elif compensate_max_noise > NOISE_MAX_THRESHOLD:
+                        max_seen = array[i][3]
+                    else:
+                        compensate_max_noise += 1
+
                 if array[i][3] < min_seen:
-                    min_seen = array[i][3]    
+                    if (not set_first_min):                        
+                       min_seen = array[i][3]  
+                       set_first_min = True   
+                    elif compensate_min_noise > NOISE_MIN_THRESHOLD:
+                        min_seen = array[i][3]
+                    else:
+                        compensate_min_noise += 1
 
                 if (array[i][3] > previous_sensor2):
                     sensor2_direction += 1
@@ -291,6 +346,10 @@ class FeatureCalculator:
         #Vector[9] = 1 if large range of motion, -1 otherwise
         #Distinguish between horizontal swipes vs circles
         self.range(feature_vector, max_seen, min_seen)
+
+        #Vector[10] = See how close the start and end are in terms of vertical range
+        #if start/end is on different sides
+        self.mirrored(feature_vector, first, last)
 
         #Nullify features based on FEATURE_ON 
         index = 0
