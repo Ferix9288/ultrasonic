@@ -103,10 +103,25 @@ def main():
             gesture_type = data[-1].rstrip('\n')
             print gesture_type
 
-            if gesture_type == "swieUp":
+
+            if gesture_type == "swipeUp":
                 right_gesture = SWIPE_UP
             elif gesture_type == "swipeDown":
                 right_gesture = SWIPE_DOWN
+            elif gesture_type == "swipeRight":
+                right_gesture = SWIPE_RIGHT
+            elif gesture_type == "swipeLeft":
+                right_gesture = SWIPE_LEFT
+            elif gesture_type == "circles":
+                right_gesture = CIRCLE
+            elif gesture_type == "v":
+                right_gesture = V
+            elif gesture_type == "caret":
+                right_gesture = CARET
+            elif gesture_type == "triangle":
+                right_gesture = TRIANGLE
+
+                
 
             #print current_x, current_y
             process_data(sensor_data, right_gesture);
@@ -154,7 +169,7 @@ weights_swipeDown = Vector([0, 0, 4, -6, 0, -2, 0, -4, -9, 2], SWIPE_DOWN)
 weights_circle = Vector([0, 0, 0, 0, 0, 8, -6, 7, 0, 4], CIRCLE)
 weights_v = Vector([0, 0, 10, 10, 0, -4, 3, 0, 0, 4], V)
 weights_caret = Vector([0, 0, -10, -10, 0, -4, 3, 0, 0, 4], CARET)
-weights_triangle = Vector([0, 0, 0, 0, 3, 9, 4, 2, 0, 4), TRIANGLE)
+weights_triangle = Vector([0, 0, 0, 0, 3, 9, 4, 2, 0, 4], TRIANGLE)
 
 #weights_heart = Vector([0, 0, 0, 0, 0, 0], HEART)
 
