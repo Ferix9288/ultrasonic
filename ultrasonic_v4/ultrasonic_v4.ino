@@ -31,7 +31,7 @@
 #define MOVEMENT_THRESHOLD 2
 #define RESILIENCY 1
 
-#define GESTURE_COUNT 20
+#define GESTURE_COUNT 25
 #define GESTURE_TIME 1500
 
 //FOR STATE VARIABLE
@@ -237,7 +237,7 @@ void gestureRecognition() {
     int difference_time = millis() - last_time;
     
     //Track all hand movements above sensor. Ignore if outside range
-    if (state != OUTSIDE && mode == GAMING_MODE) {
+    if (state != OUTSIDE && mode == GAMING_MODE && gesture_counter < GESTURE_COUNT) {
       gesture_array[gesture_counter] = state;  
       sensor0_array[gesture_counter] = cm[0];
       sensor1_array[gesture_counter] = cm[1];

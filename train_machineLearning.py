@@ -1,73 +1,15 @@
-#Serial connection
-import serial
-#COM_LIST = ['COM3', 'COM4', 'COM5']
-# configure the serial connections (the parameters differs on the device you are connecting to)
-ser = 0
-which_com = 0
+#Grab all files
+import os
+import sys
+import glob
+import random
 
-for i in range(0, 16):
-    try:
-        com = 'COM' + str(i)
-        ser = serial.Serial(com)
-    except:
-        pass
-    else:
-        which_com = com
-        print "COM PORT:", which_com, " Found!"
-        break;
+all_files = []
+for f in glob.glob("*.txt"):
+    opened_file = open(f, "r")
+    all_files.append(opened_file)
+print all_files
 
-if which_com == 0:
-    print "No COM ports found!"
-
-import win32api, win32con, win32gui
-from time import sleep
-# def click(x,y):
-#     win32api.SetCursorPos((x,y))
-#     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
-#     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)
-
-import webbrowser
-new = 2 # open in a new tab, if possible
-
-# open a public URL, in this case, the webbrowser docs
-url = "http://google.com"
-
-import speech
-
-def move(x,y):
-    win32api.SetCursorPos((x,y))
-
-def click(x,y):
-    win32api.SetCursorPos((x,y))
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)
-    #double click
-    #win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
-    #win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)
-
-def get_pos():
-    flags, hcursor, (x,y) = win32gui.GetCursorInfo()
-    return x, y
-
-movement = 12
-
-# import win32com
-
-# shell = win32com.client.Dispatch("WScript.Shell")
-# shell.Run("notepad");
-# win32api.Sleep(100)
-# shell.AppActivate("myApp")
-# win32api.Sleep(100)
-# shell.SendKeys("%")
-# win32api.Sleep(500)
-# shell.SendKeys("t")
-# win32api.Sleep(500)
-# shell.SendKeys("r")
-# win32api.Sleep(500)
-# shell.SendKeys("name")
-# win32api.Sleep(500)
-# shell.SendKeys("{ENTER}")
-# win32api.Sleep(2500)
 
 #STATES (FROM ARDUINO)
 OUTSIDE = 0
@@ -91,9 +33,9 @@ SWIPE_LEFT = 1;
 SWIPE_UP = 2;
 SWIPE_DOWN = 3;
 CIRCLE = 4;
-HEART = 5;
+V = 5;
+HEART = 6;
 TRIANGLE = 6;
-V = 7;
 UNKNOWN = 8;
 FEATURE = 9; #filler
 
@@ -101,7 +43,6 @@ GESTURE = UNKNOWN;
 GESTURE_THRESHOLD = 2
 
 class Vector:
-
 
     def __init__(self, init_data = [], gesture = UNKNOWN):
         self.data = init_data
@@ -132,54 +73,43 @@ def main():
     sensor2 = 0;
 
     while(True):
-        #print current_x, current_y
-        try:
-            message = ser.read()
-            current_x, current_y = get_pos()
-            if message == 'A': #go up
-                move(current_x, current_y-movement)
-            elif message == 'a': #go down
-                move(current_x, current_y+movement)
-            elif message == 'R': #go upright
-                move(current_x+movement, current_y-movement)
-            elif message == 'r': #go downright
-                move(current_x+movement, current_y+movement)
-            elif message == 'b': #go right
-                move(current_x+movement, current_y)
-            elif message == 'L': #go upleft
-                move(current_x-movement, current_y-movement)
-            elif message == 'l': #go downleft
-                move(current_x-movement, current_y+movement)
-            elif message == 'c': #go left
-                move(current_x-movement, current_y)
-            elif message == 'C': #click
-                click(current_x, current_y)
-            elif message == 'x':
-                webbrowser.open(url,new=new)
-            elif message == 'y':
-                speech.say("You're Awesome!")
-            elif message == 'd':
-                #speech.say("Processing!")
-                print "Processing!"
-                process_data(sensor_data);
-                sensor_data = []
-            else:
-                #print "Track data: " + str(track_data)
-                message = ord(message)
-                if track_data == 0: 
-                    sensor_state = message;
-                    track_data += 1;
-                elif track_data == 1:
-                    sensor0_data = message;
-                    track_data += 1;
-                elif track_data == 2:
-                    sensor1_data = message;
-                    track_data += 1;
-                elif track_data == 3:
-                    sensor2_data = message;
-                    new_array = [sensor_state, sensor0_data, sensor1_data, sensor2_data]
-                    sensor_data.append(new_array)
-                    track_data = 0;
+        try: 
+            #f = open(all_files[0], 'r');
+            f = random.choice(all_files)
+            text = f.readline()
+            if not(text):
+                f.close()
+                all_files.remove(f)
+                if not(all_files):
+                    sys.exit(1)
+            data = text.split('], ')
+            the_data = data[0:-1]
+            sensor_data = []
+            for d in the_data:
+                #remove brackets
+                d = d[1:]
+                
+                subarray = d.split(',')
+                one_data = []
+                
+                for ele in subarray:
+                    one_data.append(int(ele))
+                sensor_data.append(one_data)
+
+            print sensor_data
+
+            gesture_type = data[-1].rstrip('\n')
+            print gesture_type
+
+            if gesture_type == "swieUp":
+                right_gesture = SWIPE_UP
+            elif gesture_type == "swipeDown":
+                right_gesture = SWIPE_DOWN
+
+            #print current_x, current_y
+            process_data(sensor_data, right_gesture);
+            # sensor_data = []
+
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
@@ -232,17 +162,15 @@ all_weights.append(weights_swipeLeft)
 all_weights.append(weights_swipeUp)
 all_weights.append(weights_swipeDown)
 all_weights.append(weights_circle)
-#all_weights.append(weights_v)
+all_weights.append(weights_v)
 
 #all_weights.append(weights_heart)
 #all_weights.append(weights_triangle)
     
 
-def process_data(array):
+def process_data(array, right_answer):
     print array
     gesture, fv = calculate_features(array)
-
-    right_answer = SWIPE_UP
 
     print gesture
 
@@ -262,25 +190,25 @@ def update_weights(wrong_gesture, right_gesture, feature_vector):
     wrong_weights = all_weights[wrong_gesture]
     right_weights = all_weights[right_gesture]
     for i in range(0, len(wrong_weights.data)):
-        if wrong_weights.data[i] != 0: #don't update if 0, manually chosen these features don't matter
-            if feature_vector.data[i] > 0:
-                wrong_weights.data[i] -= feature_vector.data[i]
-            else:
-                wrong_weights.data[i] += abs(feature_vector.data[i])
-            
+        #if wrong_weights.data[i] != 0: #don't update if 0, manually chosen these features don't matter
+        if feature_vector.data[i] > 0:
+            wrong_weights.data[i] -= feature_vector.data[i]
+        else:
+            wrong_weights.data[i] += abs(feature_vector.data[i])
+        
     for i in range(0, len(right_weights.data)):
-        if right_weights.data[i] != 0: #don't update if 0, manually chosen these features don't matter
-            if feature_vector.data[i] > 0:
-                right_weights.data[i] += feature_vector.data[i]
-            else:
-                right_weights.data[i] -= abs(feature_vector.data[i])
-           
+        #if right_weights.data[i] != 0: #don't update if 0, manually chosen these features don't matter
+        if feature_vector.data[i] > 0:
+            right_weights.data[i] += feature_vector.data[i]
+        else:
+            right_weights.data[i] -= abs(feature_vector.data[i])
+       
     #based on gesture, do something
 
 def calculate_features(array):
     feature_vector = Vector([], UNKNOWN);
     gesture = UNKNOWN
-    if (len(array) < 2):
+    if (len(array) < 3):
         return gesture, None
 
     #Last Data is always the noisest because user has to take hand away. Filter it out.
