@@ -6,6 +6,8 @@
 # What's being given? All three numbers at the same time
 # What can I do? Plot numbers, calculate all the features
 
+#SELECT WHICH FEATURES YOU WANT ON
+FEATURE_ON = [0, 1, 1, 1, 0, 1, 1, 0, 1, 1]
 
 #Feature Vector
 #Vector[0] = starting location? -1 = left, 0 = neutral, 1 = right
@@ -99,15 +101,15 @@ class Classifier:
         weights_caret = Vector([-5, -3, -3, 1, 3, 1, 2, 1, 1, 3], CARET)
         weights_triangle = Vector([0, 0, 0, -1, -1, 3, 3, -2, -2, 2], TRIANGLE)
 
-        all_weights = []
-        all_weights.append(weights_swipeRight)
-        all_weights.append(weights_swipeLeft)
-        all_weights.append(weights_swipeUp)
-        all_weights.append(weights_swipeDown)
-        all_weights.append(weights_circle)
-        all_weights.append(weights_v)
-        all_weights.append(weights_caret)
-        all_weights.append(weights_triangle)
+        self.all_weights = []
+        self.all_weights.append(weights_swipeRight)
+        self.all_weights.append(weights_swipeLeft)
+        self.all_weights.append(weights_swipeUp)
+        self.all_weights.append(weights_swipeDown)
+        self.all_weights.append(weights_circle)
+        self.all_weights.append(weights_v)
+        self.all_weights.append(weights_caret)
+        self.all_weights.append(weights_triangle)
 
     def add_weight(self, weight_array, type_gesture):
         new_weight = Vector(weight_array, type_gesture)
@@ -134,14 +136,16 @@ class Classifier:
 
     def print_weights(self):
         update_file = open('updateWeights.txt', 'w')
-        for w in Classifier.all_weights:
+        for w in self.all_weights:
             print w.data
             update_file.write(str(w.data) + "\n")
         update_file.close()
 
+    #Note: certain features may be nullified with FEATURE_ON where their values = 0
     def update_weights(self, wrong_gesture, right_gesture, feature_vector):
-        wrong_weights = Classifier.all_weights[wrong_gesture]
-        right_weights = Classifier.all_weights[right_gesture]
+        wrong_weights = self.all_weights[wrong_gesture]
+        right_weights = self.all_weights[right_gesture]
+
         for i in range(0, len(wrong_weights.data)):
             #if wrong_weights.data[i] != 0: #don't update if 0, manually chosen these features don't matter
             if feature_vector.data[i] > 0:
@@ -444,6 +448,13 @@ class Classifier:
         #Distinguish between horizontal swipes vs circles
         self.range(feature_vector, max_seen, min_seen)
 
+        #Nullify features based on FEATURE_ON 
+        index = 0
+        for number in FEATURE_ON:
+            if number == 0:
+                feature_vector.data[number] = 0
+            index += 1
+
         print feature_vector.get_data()
         print "ADJUSTING FEATURE: " + str(feature_vector.get_data()[5])
 
@@ -451,7 +462,7 @@ class Classifier:
         current_max = float("-inf")
         index_max = 0
         index = 0
-        for weight in Classifier.all_weights:
+        for weight in self.all_weights:
             dot_product = weight.dot_product(feature_vector)
             print "DOT PRODUCT " + str(index) + ": " + str(dot_product)
             if dot_product > current_max:
@@ -459,7 +470,7 @@ class Classifier:
                 index_max = index
             index += 1 
 
-        gesture = Classifier.all_weights[index_max].gesture
+        gesture = self.all_weights[index_max].gesture
         if (abs(current_max) < GESTURE_THRESHOLD):
             return UNKNOWN, feature_vector
         return gesture, feature_vector
