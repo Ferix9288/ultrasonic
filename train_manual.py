@@ -1,5 +1,7 @@
-import classifier
+import classifier 
 from classifier import *
+import feature_calculator
+from feature_calculator import *
 #INSERT CURRENT GESTURE HERE
 right_gesture = SWIPE_DOWN
 
@@ -67,8 +69,8 @@ def main():
     sensor0 = 0;
     sensor1 = 0;
     sensor2 = 0;
-    cl = classifier.Classifier()
-
+    cl = classifier.Classifier(ALL_WEIGHTS, feature_calculator.FeatureCalculator(FEATURE_ON))
+    print FEATURE_ON
     while(True):
         #print current_x, current_y
         try:

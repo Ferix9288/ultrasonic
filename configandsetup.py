@@ -1,7 +1,7 @@
 #CONFIG/SET-UP FILE - THE GO TO FILE TO TWEAK PARAMETERS
 
 #SELECT WHICH FEATURES YOU WANT ON
-FEATURE_ON = [0, 1, 1, 1, 0, 1, 1, 0, 1, 1]
+FEATURE_ON = [1, 1, 1, 1, 0, 1, 1, 0, 1, 1]
 
 #Feature Vector
 #Vector[0] = starting location? -1 = left, 0 = neutral, 1 = right
@@ -77,14 +77,24 @@ class Vector:
         self.data.append(i)
 
 #~~~~~~~WEIGHTS~~~~~~~~~~~
-weights_swipeRight = Vector([-5, 7, 2, 0, 1, 1, 5, 1, -3, -3], SWIPE_RIGHT)
-weights_swipeLeft = Vector([4, -8, 0, -1, 0, -1, 3, 2, 2, 0], SWIPE_LEFT)
-weights_swipeUp = Vector([2, 3, -6, 4, 1, 0, -5, 0, 7, -1], SWIPE_UP)
-weights_swipeDown = Vector([0, 0, 3, -6, 0, -6, -3, -4, -3, 0], SWIPE_DOWN)
-weights_circle = Vector([1, 2, 0, 0, -4, 5, 9, 3, 0, 12], CIRCLE)
-weights_v = Vector([4, 0, 3, 0, 1, -2, 2, 1, -1, 3], V)
-weights_caret = Vector([-5, -3, -3, 1, 3, 1, 2, 1, 1, 3], CARET)
-weights_triangle = Vector([0, 0, 0, -1, -1, 3, 3, -2, -2, 2], TRIANGLE)
+weights_swipeRight = Vector([-6, -6, 2, 3, 1, -1, 7, 1, 0, -2], SWIPE_RIGHT)
+weights_swipeLeft = Vector([2, -5, -1, 1, 0, 1, 0, 2, 3, -1], SWIPE_LEFT)
+weights_swipeUp = Vector([-2, 1, 0, 4, 1, -1, -4, 0, 0, 0], SWIPE_UP)
+weights_swipeDown = Vector([-2, 2, 3, -7, 0, -2, -2, -4, -5, 4], SWIPE_DOWN)
+weights_circle = Vector([0, 0, -4, -2, -4, 2, 1, 3, 0, 2], CIRCLE)
+weights_v = Vector([2, 3, 0, -3, 1, 2, 2, 1, -2, 2], V)
+weights_caret = Vector([2, 0, 0, 2, 3, -1, 6, 1, 1, 3], CARET)
+weights_triangle = Vector([5, 6, -1, -1, -1, 1, 6, -2, 4, 8], TRIANGLE)
+
+#Previous Iteration
+# weights_swipeRight = Vector([-5, 7, 2, 0, 1, 1, 5, 1, -3, -3], SWIPE_RIGHT)
+# weights_swipeLeft = Vector([4, -8, 0, -1, 0, -1, 3, 2, 2, 0], SWIPE_LEFT)
+# weights_swipeUp = Vector([2, 3, -6, 4, 1, 0, -5, 0, 7, -1], SWIPE_UP)
+# weights_swipeDown = Vector([0, 0, 3, -6, 0, -6, -3, -4, -3, 0], SWIPE_DOWN)
+# weights_circle = Vector([1, 2, 0, 0, -4, 5, 9, 3, 0, 12], CIRCLE)
+# weights_v = Vector([4, 0, 3, 0, 1, -2, 2, 1, -1, 3], V)
+# weights_caret = Vector([-5, -3, -3, 1, 3, 1, 2, 1, 1, 3], CARET)
+# weights_triangle = Vector([0, 0, 0, -1, -1, 3, 3, -2, -2, 2], TRIANGLE)
 
 ALL_WEIGHTS = []
 ALL_WEIGHTS.append(weights_swipeRight)

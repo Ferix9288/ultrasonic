@@ -2,17 +2,6 @@ from configandsetup import *
 
 class Classifier:
 
-    #Previous Iteration
-    # weights_swipeRight = Vector([-5, 4, -2, 0, 3, -2, 1, -1, -1, 1], SWIPE_RIGHT)
-    # weights_swipeLeft = Vector([3, -3, -1, -2, 5, 0, 1, -3, -1, 1], SWIPE_LEFT)
-    # weights_swipeUp = Vector([3, 2, -5, 3, 2, -1, -4, 3, 6, 2], SWIPE_UP)
-    # weights_swipeDown = Vector([2, 0, 5, -5, -3, -7, 2, -5, -4, 3], SWIPE_DOWN)
-    # weights_circle = Vector([1, 1, -1, -4, 2, 5, 2, 5, 0, 6], CIRCLE)
-    # weights_v = Vector([1, 3, 3, 2, -1, -4, 3, -1, -1, 3], V)
-    # weights_caret = Vector([-4, -5, 0, 3, -5, 7, 8, 5, 1, -1], CARET)
-    # weights_triangle = Vector([0, -1, 0, 0, -2, 3, 3, -1, 1, 1], TRIANGLE)
-
-
     which_sensor = 0
 
     def __init__(self, all_weights, feature_calculator):
@@ -57,8 +46,8 @@ class Classifier:
         fv = self.feature_calculator.calculate_features(array)
         self.gesture = self.classify(fv)
 
-        if gesture != right_answer and gesture != UNKNOWN:
-            self.update_weights(gesture, right_answer, fv)
+        if self.gesture != right_answer and self.gesture != UNKNOWN:
+            self.update_weights(self.gesture, right_answer, fv)
             #print fv
             print "UPDATED WEIGHTS!"
         print "Length of processed: " + str(len(array)) 

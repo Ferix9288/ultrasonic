@@ -4,7 +4,10 @@ import sys
 import glob
 import random
 
-import classifier
+import classifier 
+from classifier import *
+import feature_calculator
+from feature_calculator import *
 
 all_files = []
 for f in glob.glob("*.txt"):
@@ -75,7 +78,7 @@ def main():
     sensor1 = 0;
     sensor2 = 0;
 
-    cl = classifier.Classifier()
+    cl = classifier.Classifier(ALL_WEIGHTS, feature_calculator.FeatureCalculator(FEATURE_ON))
 
     while(True):
         try: 

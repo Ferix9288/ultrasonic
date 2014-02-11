@@ -296,7 +296,7 @@ class FeatureCalculator:
         index = 0
         for number in FEATURE_ON:
             if number == 0:
-                feature_vector.data[number] = 0
+                feature_vector.data[index] = 0
             index += 1
 
         print feature_vector.get_data()
