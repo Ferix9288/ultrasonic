@@ -23,7 +23,7 @@
 #define ECHO3      8
 
 #define MAX_DISTANCE 30 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
-#define PING_INTERVAL 22 //keep track of timing difference among pings of different sensors
+#define PING_INTERVAL 30 //keep track of timing difference among pings of different sensors
 #define DELAY 0
 
 #define UP_THRESHOLD 12 //13 cm and above = up
@@ -176,8 +176,8 @@ void fullCycle() {
 void decipherSensor() {
   //if ( cm[1] != 0) {
  
- if ( (current_state == NEUTRAL && cm[0] !=0 && cm[1] != 0 && cm[2] != 0) ||
-       (current_state == SPAN_ALL && cm[0] !=0 && cm[1] != 0 && cm[2] != 0)){
+ if ( mode == MOUSE_MODE && ((current_state == NEUTRAL && cm[0] !=0 && cm[1] != 0 && cm[2] != 0) ||
+       (current_state == SPAN_ALL && cm[0] !=0 && cm[1] != 0 && cm[2] != 0) )){
    state = SPAN_ALL;   
  }  else if ( (cm[1] != 0)) {
      sensor1_detected = true; 
@@ -232,13 +232,13 @@ void gestureRecognition() {
     if (sensor0_detected || sensor1_detected || sensor2_detected) {
       gestureCheck = true;
       last_time = millis();
-      if (state != OUTSIDE && mode == GAMING_MODE && gesture_counter < GESTURE_COUNT) {
-        gesture_array[gesture_counter] = state;  
-        sensor0_array[gesture_counter] = cm[0];
-        sensor1_array[gesture_counter] = cm[1];
-        sensor2_array[gesture_counter] = cm[2];
-        gesture_counter++;
-      }
+//      if (state != OUTSIDE && mode == GAMING_MODE && gesture_counter < GESTURE_COUNT) {
+//        gesture_array[gesture_counter] = state;  
+//        sensor0_array[gesture_counter] = cm[0];
+//        sensor1_array[gesture_counter] = cm[1];
+//        sensor2_array[gesture_counter] = cm[2];
+//        gesture_counter++;
+//      }
     }
   } else {
     int difference_time = millis() - last_time;
@@ -369,20 +369,21 @@ void communicate() {
       }
   } else {
     
-     if (current_state == SPAN_ALL) {
-        if (!(click_once)) {
-          last_clicked = millis();
-          Serial.write('C');
-          click_once = true;
-//          gesture_counter = 0;
-//          sensor0_detected = false; 
-//          sensor1_detected = false; 
-//          sensor2_detected = false;
-//          sweep_leftright = false;
-//          sweep_rightleft = false;  
-//          gestureCheck = false;   
-        } 
-     } else if (current_state == GESTURE) {
+//     if (current_state == SPAN_ALL) {
+//        if (!(click_once)) {
+//          last_clicked = millis();
+//          Serial.write('C');
+//          click_once = true;
+////          gesture_counter = 0;
+////          sensor0_detected = false; 
+////          sensor1_detected = false; 
+////          sensor2_detected = false;
+////          sweep_leftright = false;
+////          sweep_rightleft = false;  
+////          gestureCheck = false;   
+//        } 
+//     } else 
+     if (current_state == GESTURE) {
       //printGestureArray();
       for (int i = 0; i < gesture_counter; i++) {
            Serial.write(gesture_array[i]);
