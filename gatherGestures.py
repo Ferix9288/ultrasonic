@@ -73,7 +73,7 @@ movement = 12
 def main(name):
     
     filename = name + ".txt"
-    f = open(filename, "w")
+    f = open(filename, "a")
 
     track_data = 0;
     sensor_data = [];
