@@ -1,7 +1,7 @@
 #CONFIG/SET-UP FILE - THE GO TO FILE TO TWEAK PARAMETERS
 
 #SELECT WHICH FEATURES YOU WANT ON
-FEATURE_ON = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+FEATURE_ON = [1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1]
 
 #Feature Vector
 #Vector[0] = starting location? -1 = left, 0 = neutral, 1 = right
@@ -14,7 +14,8 @@ FEATURE_ON = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 #Vector[7] = What's the overall directions of each sensor? 
 #Vector[8] = overall direction of sensor with max value?
 #Vector[9] = 1 if large range of motion, -1 otherwise
-#Vector[10] = only look at range 
+#Vector[10] = only look at difference in value at end points if at different sides
+#Vector[11] = if start/end at same side, calculate difference in sensor value
 
 
 #Brainstorm features for classifying features (worth to implement?)
@@ -59,7 +60,7 @@ GESTURE = UNKNOWN;
 #Noise threshold for picking out the range (max/low)
 NOISE_MAX_THRESHOLD = 3
 NOISE_MIN_THRESHOLD = 3
-RANGE_THRESHOLD = 8
+RANGE_THRESHOLD = 6
 
 
 class Vector:
@@ -85,14 +86,23 @@ class Vector:
 
 #~~~~~~~WEIGHTS~~~~~~~~~~~
 
-weights_swipeRight = Vector([-3, 0, 0, -2, 0, 3, 7, 4, -3, -30, 0], SWIPE_RIGHT)
-weights_swipeLeft = Vector([4, -10, -3, 1, -1, 1, 1, 3, 2, -30, 0], SWIPE_LEFT)
-weights_swipeUp = Vector([-3, 0, 2, 6, 2, -4, -8, 1, 1, -1, 0], SWIPE_UP)
-weights_swipeDown = Vector([-2, 4, 0, -7, -1, -5, -1, -5, -2, 3, 0], SWIPE_DOWN)
-weights_circle = Vector([1, 4, -3, -4, 0, 3, 2, 3, 0, 4, 0], CIRCLE)
-weights_v = Vector([4, 4, 1, -1, 0, 1, 2, -2, -1, -1, 0], V)
-weights_caret = Vector([0, 0, -1, -2, -3, -1, 8, 3, 1, 5, 0], CARET)
-weights_triangle = Vector([0, -1, 3, 6, 4, 3, 5, -5, 3, 9, 0], TRIANGLE)
+weights_swipeRight = Vector([-2, 0, 0, 2, 0, -3, 7, 2, -3, -2, -2, -1], SWIPE_RIGHT)
+weights_swipeLeft = Vector([0, -3, -3, -1, 0, 1, 1, 0, 2, -3, -2, 1], SWIPE_LEFT)
+weights_swipeUp = Vector([-2, -1, -2, 0, 0, -3, -8, -2, 1, -2, 2, 1], SWIPE_UP)
+weights_swipeDown = Vector([0, 1, 4, -6, -1, 0, -1, 0, -2, -2, 4, -6], SWIPE_DOWN)
+weights_circle = Vector([0, 1, -1, -2, -1, 2, 2, 1, 0, 0, -1, 2], CIRCLE)
+weights_v = Vector([5, 3, -1, -2, -3, 2, 2, 0, -1, 1, -1, 1], V)
+weights_caret = Vector([-1, -2, -1, -1, 0, -1, 8, 1, 1, 1, -1, -1], CARET)
+weights_triangle = Vector([1, 2, 3, 7, 6, 3, 5, 0, 3, 6, 1, 3], TRIANGLE)
+
+# weights_swipeRight = Vector([-3, 0, 0, -2, 0, 3, 7, 4, -3, -10, 0, 0], SWIPE_RIGHT)
+# weights_swipeLeft = Vector([4, -10, -3, 1, -1, 1, 1, 3, 2, -10, 0, 0], SWIPE_LEFT)
+# weights_swipeUp = Vector([-3, 0, 2, 6, 2, -4, -8, 1, 1, -1, 0, 0], SWIPE_UP)
+# weights_swipeDown = Vector([-2, 4, 0, -7, -1, -5, -1, -5, -2, 3, 0, 0], SWIPE_DOWN)
+# weights_circle = Vector([1, 4, -3, -4, 0, 3, 2, 3, 0, 4, 0, 0], CIRCLE)
+# weights_v = Vector([4, 4, 1, -1, 0, 1, 2, -2, -1, -1, 0, 0], V)
+# weights_caret = Vector([0, 0, -1, -2, -3, -1, 8, 3, 1, 5, 0, 0], CARET)
+# weights_triangle = Vector([0, -1, 3, 6, 4, 3, 5, -5, 3, 9, 0, 0], TRIANGLE)
 
 # weights_swipeRight = Vector([-2, -2, -1, -1, -1, 3, 7, 3, -2, -2], SWIPE_RIGHT)
 # weights_swipeLeft = Vector([4, -9, -3, -2, 1, 0, 1, 1, 0, -2], SWIPE_LEFT)

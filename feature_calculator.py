@@ -51,7 +51,7 @@ class FeatureCalculator:
         if (state_first == state_last):
             feature_vector.add_data(1)
         else:
-            feature_vector.add_data(-1)
+            feature_vector.add_data(0)
     
     #Vector[5] = Same as above but calculated based on sensor values
     #Difference only based on one sensor
@@ -100,9 +100,9 @@ class FeatureCalculator:
     #If sum of directions fall within abs 3, then must likely circle/horizontal swipes
     def total_direction(self, feature_vector, sum_directions):
         if (abs(sum_directions) <= 3):
-            feature_vector.add_data(1)
+            feature_vector.add_data(0)
         else:
-            feature_vector.add_data(-1)
+            feature_vector.add_data(1)
             
 
     #Vector[8] = overall direction of sensor with max value?
@@ -135,15 +135,30 @@ class FeatureCalculator:
         else:
             feature_vector.add_data(0)
 
+    #Vector[11] = if start/end at same side, calculate difference in sensor value
+    def risingorfalling(self, feature_vector, start, end):
+        if feature_vector.data[0] == feature_vector.data[1]:
+            max_start = max(start[1:])
+            max_end = max(end[1:])
+            diff = max_start - max_end
+            if diff > 0:
+                feature_vector.add_data(-1) # falling
+            elif diff < 0:
+                feature_vector.add_data(1) #rising
+            else:
+                feature_vector.add_data(0)     
+        else:
+            feature_vector.add_data(0)   
+
     def calculate_features(self, array):
         feature_vector = Vector([], UNKNOWN);
         gesture = UNKNOWN
         if (len(array) < 3):
             return None
 
-        #Last Data is always the noisest because user has to take hand away. Filter it out.
-        array = array[0:len(array)-1]
-        print "Filtered Array: " + str(array)
+        # #Last Data is always the noisest because user has to take hand away. Filter it out.
+        # array = array[0:len(array)-1]
+        # print "Filtered Array: " + str(array)
 
         first = array[0] 
         last = array[len(array)-1]
@@ -351,6 +366,9 @@ class FeatureCalculator:
         #if start/end is on different sides
         self.mirrored(feature_vector, first, last)
 
+        #Vector[11] = if start/end at same side, calculate difference in sensor value
+        self.risingorfalling(feature_vector, first, last)
+
         #Nullify features based on FEATURE_ON 
         index = 0
         for number in FEATURE_ON:
@@ -359,7 +377,7 @@ class FeatureCalculator:
             index += 1
 
         print feature_vector.get_data()
-        print "ADJUSTING FEATURE: " + str(feature_vector.get_data()[5])
+        print "ADJUSTING FEATURE: " + str(feature_vector.get_data()[7])
 
  
         return feature_vector
