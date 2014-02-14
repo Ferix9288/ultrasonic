@@ -46,7 +46,8 @@ class Classifier:
         if self.gesture != right_answer and self.gesture != UNKNOWN:
             self.update_weights(self.gesture, right_answer, fv)
             #print fv
-            print "UPDATED WEIGHTS!"
+            print "UPDATED WEIGHTS:" + gestureToText(right_answer)
+            print "GUESSED: " + gestureToText(self.gesture)
         print "Length of processed: " + str(len(array)) 
         self.print_weights()
 
@@ -63,20 +64,17 @@ class Classifier:
         right_weights = self.all_weights[right_gesture]
 
         for i in range(0, len(wrong_weights.data)):
-            #if wrong_weights.data[i] != 0: #don't update if 0, manually chosen these features don't matter
             if feature_vector.data[i] > 0:
                 wrong_weights.data[i] -= feature_vector.data[i]
             else:
                 wrong_weights.data[i] += abs(feature_vector.data[i])
             
         for i in range(0, len(right_weights.data)):
-            #if right_weights.data[i] != 0: #don't update if 0, manually chosen these features don't matter
             if feature_vector.data[i] > 0:
                 right_weights.data[i] += feature_vector.data[i]
             else:
                 right_weights.data[i] -= abs(feature_vector.data[i])
         
-    #based on gesture, do something
-
+   
     
 

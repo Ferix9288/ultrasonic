@@ -150,8 +150,8 @@ class FeatureCalculator:
         else:
             feature_vector.add_data(0)   
 
-    #Vector[13] = look at overall direction in first half
-    #Vector[14] = look at overall direction in second half
+    #Vector[12] = look at overall direction in first half
+    #Vector[13] = look at overall direction in second half
     def directions(self, feature_vector, directions):
         if (directions > DIRECTION_THRESHOLD):
             feature_vector.add_data(1)
@@ -159,6 +159,24 @@ class FeatureCalculator:
             feature_vector.add_data(-1)
         else:
             feature_vector.add_data(0)
+
+    #Vector[14] = Flunctuation of states. Less = swipes 
+    def fluctuations(self, feature_vector, fluctunate_states):
+        if (fluctunate_states > FLUCTUATION):
+            feature_vector.add_data(1)
+        else:
+            feature_vector.add_data(0)
+
+    #Vector[15] = See positioning of middle. Helps with caret vs V 
+    def where_middle(self, feature_vector, middle):
+        if middle[2] != 0:
+            if middle[2] < MIDDLE_CUTOFF:
+                feature_vector.add_data(1)
+            else:
+                feature_vector.add_data(0)
+        else:
+            feature_vector.add_data(0)
+
 
     def calculate_features(self, array):
         feature_vector = Vector([], UNKNOWN);
@@ -255,6 +273,7 @@ class FeatureCalculator:
 
             if (array[i][0]) != previous_state:
                 fluctunate_states += 1
+            previous_state = array[i][0]
 
             if (array[i][1] != 0):
                 if array[i][1] > max_seen:
@@ -409,6 +428,12 @@ class FeatureCalculator:
         #Vector[12/13] = look at overall direction in first half/second half
         self.directions(feature_vector, first_half_directions)
         self.directions(feature_vector, second_half_directions)
+
+        #Vector[14] = Flunctuation of states. Less = swipes 
+        self.fluctuations(feature_vector, fluctunate_states)
+
+        #Vector[15] = See positioning of middle. Helps with caret vs V 
+        self.where_middle(feature_vector, middle)
 
 
         #Nullify features based on FEATURE_ON 
