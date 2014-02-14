@@ -34,6 +34,8 @@
 #define GESTURE_COUNT 50
 #define GESTURE_TIME 1500
 
+#define NO_MOVEMENT 10
+
 //FOR STATE VARIABLE
 #define OUTSIDE  0
 #define LEFT_DOWN 1
@@ -92,6 +94,7 @@ int sensor1_array[GESTURE_COUNT];
 int sensor2_array[GESTURE_COUNT];
 
 int gesture_counter = 0;
+int outside_counter = 0;
 boolean sweep_leftright = false;
 boolean sweep_rightleft = false;
 boolean gestureCheck = false;
@@ -166,7 +169,7 @@ void fullCycle() {
   resiliency();
   communicate();
   check_mode();
- // Serial.println("State:" + String(state));
+  //Serial.println("State:" + String(state));
  // Serial.println("Current State:" + String(current_state));
  // Serial.println("Mode:" + String(mode));
  //Serial.println();
@@ -230,6 +233,11 @@ void gestureRecognition() {
    
   if (!gestureCheck) {
     if (sensor0_detected || sensor1_detected || sensor2_detected) {
+      //Serial.println("GESTURE DETECTED!");
+      //Serial.println(sensor0_detected);
+      //Serial.println(sensor1_detected);
+      //Serial.println(sensor2_detected);
+      
       gestureCheck = true;
       last_time = millis();
       if (state != OUTSIDE && mode == GAMING_MODE && gesture_counter < GESTURE_COUNT) {
@@ -254,29 +262,38 @@ void gestureRecognition() {
     
     //if (difference_time > GESTURE_TIME) { //check after every second
     if (state == OUTSIDE) {    
-      //Serial.println("Checking gesture...");
-       if (mode == GAMING_MODE) {
+       outside_counter += 1;
+       
+       //Serial.println("Checking gesture...");
+       if (outside_counter > NO_MOVEMENT) {
+         if (mode == GAMING_MODE) {
           state = GESTURE;
+          sensor0_detected = false; 
+          sensor1_detected = false; 
+          sensor2_detected = false;
+          sweep_leftright = false;
+          sweep_rightleft = false;
+          gestureCheck = false;  
        } else {
-        if (sensor0_detected && sensor1_detected && sensor2_detected) {
-          if (sweep_leftright) {
-            state = SWIPE_RIGHT;
-            //Serial.println("Swept Left...");   
-          } else if (sweep_rightleft) {
-            state = SWIPE_LEFT;
-            //Serial.println("Swept Right...");     
+          if (sensor0_detected && sensor1_detected && sensor2_detected) {
+            if (sweep_leftright) {
+              state = SWIPE_RIGHT;
+              //Serial.println("Swept Left...");   
+            } else if (sweep_rightleft) {
+              state = SWIPE_LEFT;
+              //Serial.println("Swept Right...");     
+            }          
           }
         }
         
-      }
-      
-      sensor0_detected = false; 
-      sensor1_detected = false; 
-      sensor2_detected = false;
-      sweep_leftright = false;
-      sweep_rightleft = false;
-      
-      gestureCheck = false;   
+        sensor0_detected = false; 
+        sensor1_detected = false; 
+        sensor2_detected = false;
+        sweep_leftright = false;
+        sweep_rightleft = false;
+        gestureCheck = false;  
+         }
+      //Serial.println(gestureCheck);
     }
   } 
     
@@ -400,6 +417,8 @@ void communicate() {
       }
       Serial.write('d');
       gesture_counter = 0;
+      outside_counter = 0; 
+   
     } 
   }  
   
