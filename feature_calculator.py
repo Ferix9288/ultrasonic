@@ -150,6 +150,16 @@ class FeatureCalculator:
         else:
             feature_vector.add_data(0)   
 
+    #Vector[13] = look at overall direction in first half
+    #Vector[14] = look at overall direction in second half
+    def directions(self, feature_vector, directions):
+        if (directions > DIRECTION_THRESHOLD):
+            feature_vector.add_data(1)
+        elif (directions < -DIRECTION_THRESHOLD):
+            feature_vector.add_data(-1)
+        else:
+            feature_vector.add_data(0)
+
     def calculate_features(self, array):
         feature_vector = Vector([], UNKNOWN);
         gesture = UNKNOWN
@@ -212,13 +222,36 @@ class FeatureCalculator:
         set_first_max = False
         set_first_min = False
 
+        first_half = True
+        first_half_directions = 0
+        second_half_directions = 0
+        previous = max(first[1:])
+        #print previous
         for i in range(1, len(array)):
             sensor0_total += array[i][1]
             sensor1_total += array[i][2]
             sensor2_total += array[i][3]
 
-            if i == len(array)/2:
-                middle = array[i]
+            if first_half:
+                if i == len(array)/2:
+                    middle = array[i]
+                    first_half = False
+                value = max(array[i][1:])
+                if value > (previous + STEP):
+                    first_half_directions += 1
+                elif value < (previous - STEP):
+                    first_half_directions -= 1
+                previous = value
+            else:
+                value = max(array[i][1:])
+                if value > (previous + STEP):
+                    second_half_directions += 1
+                elif value < (previous - STEP):
+                    second_half_directions -= 1     
+                previous = value
+               
+
+
 
             if (array[i][0]) != previous_state:
                 fluctunate_states += 1
@@ -335,6 +368,10 @@ class FeatureCalculator:
         print "sensor1_dir: " + str(sensor1_direction)
         print "sensor2_dir: " + str(sensor2_direction)
 
+        print "first half directions: " + str(first_half_directions)
+        print "second half directions: " + str(second_half_directions)
+
+
         #Vector[7] = What's the overall directions of each sensor? 
         #If sum of directions fall within abs 3, then must likely circle/horizontal swipes
         sum_directions = sensor0_direction + sensor1_direction + sensor2_direction
@@ -369,6 +406,11 @@ class FeatureCalculator:
         #Vector[11] = if start/end at same side, calculate difference in sensor value
         self.risingorfalling(feature_vector, first, last)
 
+        #Vector[12/13] = look at overall direction in first half/second half
+        self.directions(feature_vector, first_half_directions)
+        self.directions(feature_vector, second_half_directions)
+
+
         #Nullify features based on FEATURE_ON 
         index = 0
         for number in FEATURE_ON:
@@ -377,7 +419,7 @@ class FeatureCalculator:
             index += 1
 
         print feature_vector.get_data()
-        print "ADJUSTING FEATURE: " + str(feature_vector.get_data()[7])
+        print "ADJUSTING FEATURE: " + str(feature_vector.get_data()[5])
 
  
         return feature_vector
