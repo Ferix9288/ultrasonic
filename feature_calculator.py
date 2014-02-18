@@ -5,19 +5,28 @@ class FeatureCalculator:
     def __init__(self, features_on):
         #Placeholder
         self.feature_on = features_on
+        self.which_sensors = []
+
+    def sensors_triggered(self, first_few):
+        self.which_sensors = []
+        for array in first_few:
+            for i in range(1, len(array)):
+                if array[i] != 0 and i not in self.which_sensors:
+                    self.which_sensors.append(i)
+        print self.which_sensors
+
 
     #Vector[0] = starting location? -1 = left, 1 = right
     def starting_leftright(self, feature_vector, state_first):
-        self.which_sensor = 1
         if (state_first == RIGHT_DOWN or state_first == RIGHT_MIDDLE or state_first == RIGHT_UP):
             feature_vector.add_data(1)
-            self.which_sensor = 3 #Right sensor
+            #self.which_sensors.append(3) #Right sensor
         elif state_first == MIDDLE_DOWN or state_first == NEUTRAL or state_first == MIDDLE_UP:
             feature_vector.add_data(0)
-            self.which_sensor = 2 #Middle sensor
+            #self.which_sensors.append(2) #Middle sensor
         else:
             feature_vector.add_data(-1)
-            self.which_sensor = 1 #Left Sensor
+            #self.which_sensorss.append(1) #Left Sensor
 
     #Vector[1] = end location? -1 = left, 0 = neutral, 1 =  right
     def end_leftright(self, feature_vector, state_last):
@@ -55,19 +64,27 @@ class FeatureCalculator:
     
     #Vector[5] = Same as above but calculated based on sensor values
     #Difference only based on one sensor
-    def cycle_2(self, feature_vector, array1, array2):
-        total = 0;
-        diff = abs(array1[self.which_sensor] - array2[self.which_sensor])
-        if array2[self.which_sensor] == 0:
-            diff = -1
-        if diff  == -1:
-            feature_vector.add_data(0)
-        elif diff < 9:
-            feature_vector.add_data(1)   
-        else:
-            feature_vector.add_data(-1)
+    def cycle_2(self, feature_vector, array1, array2, update):
 
-        # if which_sensor == 1:
+        #Iterate through which sensors was triggered at beginning until an actual difference is found
+        feature = 0 
+        for which_sensor in self.which_sensors:
+            total = 0;
+            diff = abs(array1[which_sensor] - array2[which_sensor]) 
+            if array1[which_sensor] == 0 or array2[which_sensor] == 0:
+                diff = -1
+
+            if diff  == -1 or diff > 9:
+                feature = 0
+            elif diff < 9:
+                feature = 1 
+                break;  
+            
+        if update:
+            feature_vector.modify_data(5, feature)
+        else:
+            feature_vector.add_data(feature)
+            # if which_sensor == 1:
         #     if array2[2] != 0:
         #         diff = abs(array1[which_sensor] - array2[2])
         #     else:
@@ -189,10 +206,19 @@ class FeatureCalculator:
         # print "Filtered Array: " + str(array)
 
         first = array[0] 
+        second_last = array[len(array)-2]
         last = array[len(array)-1]
 
         state_first = first[0]
         state_last = last[0]
+
+        #Find which sensors were triggered 
+        first_few = []
+        if (len(array) > 5):
+            first_few = array[0:3]
+        else:
+            first_few = array[0:1]    
+        self.sensors_triggered(first_few)
 
         #Vector[0] feature - start location = left, middle, or right?
         self.starting_leftright(feature_vector, state_first)
@@ -208,8 +234,16 @@ class FeatureCalculator:
 
         #Vector[5] = Same as above but calculated based on sensor values
         #Difference only based on one sensor
-        self.cycle_2(feature_vector, first, last)
-     
+        self.cycle_2(feature_vector, first, last, False)
+
+        # if (len(array) > 5):
+           
+        #     second = array[1]
+        #     second_last = array[-2]
+        #     #If Vector[5] == 0, then try second to last 
+        #     if feature_vector.get_data()[5] == 0:
+        #         self.cycle_2(feature_vector, second, last, True)
+         
         #Average values for sensor0, sensor1, sensor2
         #Positive values for direction = increasing
         #Negative = decreasing, 0 = neutral
