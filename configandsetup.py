@@ -124,90 +124,26 @@ class Vector:
         self.data.append(i)
 
 #~~~~~~~WEIGHTS~~~~~~~~~~~
-# weights_swipeRight = Vector([-7, 2, -1, -1, 0, 1, 7, 2, -3, -2, -1, 0, -1, -1, -5, -2], SWIPE_RIGHT)
-# weights_swipeLeft = Vector([5, -4, -1, 2, 0, 0, 1, 0, 2, -4, -2, -1, 0, -1, -1, -3], SWIPE_LEFT)
-# weights_swipeUp = Vector([-1, 0, -3, 0, 0, -5, -8, -2, 1, 3, 3, 6, 4, 4, -3, 2], SWIPE_UP)
-# weights_swipeDown = Vector([1, 1, 3, -1, 5, -1, -1, 0, -2, -1, 4, -6, -3, -4, -2, 1], SWIPE_DOWN)
-# weights_circle = Vector([5, 4, 0, 1, 3, -2, 2, 1, 0, 1, -1, 1, 0, 0, 4, -1], CIRCLE)
-# weights_v = Vector([-1, -2, 2, 0, -4, 1, 2, 0, -1, 0, 1, -1, -3, 5, 3, 3], V)
-# weights_caret = Vector([-1, -1, 0, -3, -6, -1, 8, 1, 1, 0, -3, 2, 5, -5, 0, 1], CARET)
-# weights_triangle = Vector([0, 1, -1, -1, 3, 8, 5, 0, 3, 2, -1, -1, -2, 2, 4, -1], TRIANGLE)
-
-
-weights_swipeRight = Vector([-6, 2, -1, 1, 0, 3, 7, 2, -3, -4, 0, 0, 1, -1, -4, -2], SWIPE_RIGHT)
+#GAME DEMO
+weights_swipeRight = Vector([-6, 3, -1, 2, 0, 3, 7, 2, -3, -5, -1, 0, 1, -1, -4, -2], SWIPE_RIGHT)
 weights_swipeLeft = Vector([4, -4, -1, 3, 0, -1, 1, 0, 2, -3, 0, 0, -3, 3, -2, -3], SWIPE_LEFT)
-weights_swipeUp = Vector([2, 3, -3, 0, 1, -4, -8, -2, 1, 0, 0, 6, 1, 5, -4, 3], SWIPE_UP)
+weights_swipeUp = Vector([3, 3, -3, 1, 1, -4, -8, -2, 1, 1, 1, 6, 1, 6, -4, 3], SWIPE_UP)
 weights_swipeDown = Vector([3, 3, 3, -5, 5, -1, -1, 0, -2, 0, 5, -6, -1, -6, -3, 4], SWIPE_DOWN)
-weights_circle = Vector([2, 4, 2, 6, 7, 8, 2, 1, 0, 3, -1, -2, -3, -2, 1, 0], CIRCLE)
-weights_v = Vector([-3, -4, 2, 5, -4, 0, 2, 0, -1, 3, -1, 0, -3, 5, 0, 2], V)
+weights_circle = Vector([2, 3, 2, 5, 7, 8, 2, 1, 0, 4, 0, -2, -3, -2, 1, 0], CIRCLE)
+weights_v = Vector([-4, -4, 2, 4, -4, 0, 2, 0, -1, 2, -2, 0, -3, 4, 0, 2], V)
 weights_caret = Vector([-2, -4, -2, -6, -6, -3, 8, 1, 1, 1, -1, 1, 5, -5, 4, 0], CARET)
 weights_triangle = Vector([1, 1, -1, -6, -1, 13, 5, 0, 3, -1, -2, 1, 3, 1, 8, -4], TRIANGLE)
 
-
-
-
+#GESTURE RECOGNITION DEMO
 # weights_swipeRight = Vector([-6, 2, -1, 1, 0, 3, 7, 2, -3, -4, 0, 0, 1, -1, -4, -2], SWIPE_RIGHT)
-# weights_swipeLeft = Vector([3, -3, -1, 2, 0, -1, 1, 0, 2, -2, 1, 0, -2, 3, -2, -3], SWIPE_LEFT)
-# weights_swipeUp = Vector([2, 3, -3, 0, 2, -4, -8, -2, 1, 1, 0, 7, 2, 5, -4, 3], SWIPE_UP)
-# weights_swipeDown = Vector([3, 3, 3, -5, 5, -2, -1, 0, -2, 1, 2, -8, -2, -4, -3, 4], SWIPE_DOWN)
-# weights_circle = Vector([2, 0, 2, 6, 8, 8, 2, 1, 0, 3, -2, 1, -2, -3, 2, 0], CIRCLE)
-# weights_v = Vector([-4, -3, 2, 4, -4, 0, 2, 0, -1, 1, -3, 0, -5, 5, 2, 1], V)
-# weights_caret = Vector([0, -2, -2, -5, -6, -4, 8, 1, 1, 2, -1, 2, 6, -3, 2, 0], CARET)
-# weights_triangle = Vector([1, 1, -1, -5, -3, 15, 5, 0, 3, -3, 3, -2, 2, -2, 7, -3], TRIANGLE)
+# weights_swipeLeft = Vector([4, -4, -1, 3, 0, -1, 1, 0, 2, -3, 0, 0, -3, 3, -2, -3], SWIPE_LEFT)
+# weights_swipeUp = Vector([2, 3, -3, 0, 1, -4, -8, -2, 1, 0, 0, 6, 1, 5, -4, 3], SWIPE_UP)
+# weights_swipeDown = Vector([3, 3, 3, -5, 5, -1, -1, 0, -2, 0, 5, -6, -1, -6, -3, 4], SWIPE_DOWN)
+# weights_circle = Vector([2, 4, 2, 6, 7, 8, 2, 1, 0, 3, -1, -2, -3, -2, 1, 0], CIRCLE)
+# weights_v = Vector([-3, -4, 2, 5, -4, 0, 2, 0, -1, 3, -1, 0, -3, 5, 0, 2], V)
+# weights_caret = Vector([-2, -4, -2, -6, -6, -3, 8, 1, 1, 1, -1, 1, 5, -5, 4, 0], CARET)
+# weights_triangle = Vector([1, 1, -1, -6, -1, 13, 5, 0, 3, -1, -2, 1, 3, 1, 8, -4], TRIANGLE)
 
-
-#Close but no cigar
-# weights_swipeRight = Vector([-6, 2, -1, 1, 0, 3, 7, 2, -3, -6, 0, 0, 1, -1, -4, -1], SWIPE_RIGHT)
-# weights_swipeLeft = Vector([4, -4, -1, 2, 0, -1, 1, 0, 2, -4, -1, 0, -1, 2, -2, -3], SWIPE_LEFT)
-# weights_swipeUp = Vector([1, 2, -3, -1, 1, -4, -8, -2, 1, 1, 0, 5, 1, 3, -4, 2], SWIPE_UP)
-# weights_swipeDown = Vector([1, 1, 3, -6, 6, -2, -1, 0, -2, 6, 2, -9, -3, -3, -1, 4], SWIPE_DOWN)
-# weights_circle = Vector([4, -1, 2, 5, 7, 11, 2, 1, 0, 3, -1, 1, -3, -4, -1, 0], CIRCLE)
-# weights_v = Vector([-2, -4, 2, 1, -4, 0, 2, 0, -1, 0, 1, 1, -4, 5, 2, 1], V)
-# weights_caret = Vector([-1, 3, -2, -4, -7, -5, 8, 1, 1, 2, 0, 1, 5, -2, 2, 0], CARET)
-# weights_triangle = Vector([0, 2, -1, -1, -2, 16, 5, 0, 3, -3, -1, 1, 4, 0, 8, -3], TRIANGLE)
-
-
-# weights_swipeRight = Vector([-4, 3, 0, 0, 0, 5, 7, 2, -3, -5, 1, -1, -3, 1, -3, -1], SWIPE_RIGHT)
-# weights_swipeLeft = Vector([2, -4, 0, 2, -1, 1, 1, 0, 2, -3, -3, 0, -1, 1, -3, -2], SWIPE_LEFT)
-# weights_swipeUp = Vector([-1, 3, -1, 1, 2, 0, -8, -2, 1, 1, 2, 7, 0, 3, -1, -1], SWIPE_UP)
-# weights_swipeDown = Vector([2, -2, 3, -4, 3, 5, -1, 0, -2, 2, 0, -10, 2, -10, 2, 1], SWIPE_DOWN)
-# weights_circle = Vector([3, 0, -1, 1, 3, 9, 2, 1, 0, 1, 1, -3, -1, 0, 2, -1], CIRCLE)
-# weights_v = Vector([-1, -2, 1, 2, -2, -3, 2, 0, -1, 1, 2, 1, -5, 6, 2, 7], V)
-# weights_caret = Vector([2, -1, -1, -5, -4, -2, 8, 1, 1, 2, -3, 4, 5, 1, -3, 0], CARET)
-# weights_triangle = Vector([-2, 4, -2, 0, 0, 17, 5, 0, 3, 0, 0, 2, 3, -2, 4, -3], TRIANGLE);
-
-
-# weights_swipeRight = Vector([-6, 3, -1, -1, 0, 1, 7, 2, -3, -5, 0, 0, 0, -2, -4, -2], SWIPE_RIGHT)
-# weights_swipeLeft = Vector([5, -4, -1, 2, 0, 0, 1, 0, 2, -2, -2, -1, -1, 1, -1, -3], SWIPE_LEFT)
-# weights_swipeUp = Vector([2, 2, -3, -1, 1, -4, -8, -2, 1, 3, 3, 4, 3, 3, -3, 2], SWIPE_UP)
-# weights_swipeDown = Vector([0, 0, 3, -1, 4, 0, -1, 0, -2, -1, 3, -5, -5, -2, -2, 1], SWIPE_DOWN)
-# weights_circle = Vector([3, 4, 0, 2, 3, -2, 2, 1, 0, -1, -2, 0, 1, 0, 4, 0], CIRCLE)
-# weights_v = Vector([-3, -1, 2, 0, -4, 0, 2, 0, -1, -1, 1, 0, -2, 4, 2, 3], V)
-# weights_caret = Vector([-3, -3, 0, 0, -6, -1, 8, 1, 1, 4, -2, 1, 4, -3, 0, 1], CARET)
-# weights_triangle = Vector([3, 0, -1, -4, 3, 7, 5, 0, 3, 2, -1, 1, 0, -1, 4, -2], TRIANGLE)
-
-
-
-#RELATIVELY GOOD GESTURE RECOGNITION (x2)
-# weights_swipeRight = Vector([-4, 3, -1, -1, 0, 1, 7, 2, -3, -6, -1, 0, 1, -1, -4, -2], SWIPE_RIGHT)
-# weights_swipeLeft = Vector([4, -4, -1, 1, 0, 0, 1, 0, 2, -2, -2, -1, -2, 2, -1, -3], SWIPE_LEFT)
-# weights_swipeUp = Vector([2, 2, -3, -1, 1, -4, -8, -2, 1, 3, 3, 4, 3, 3, -3, 2], SWIPE_UP)
-# weights_swipeDown = Vector([1, 1, 3, -1, 4, 3, -1, 0, -2, -2, 3, -6, -3, -1, -2, 1], SWIPE_DOWN)
-# weights_circle = Vector([1, 3, 0, 1, 4, -3, 2, 1, 0, 0, 0, -2, 3, -2, 5, 0], CIRCLE)
-# weights_v = Vector([-2, -1, 2, 1, -4, 0, 2, 0, -1, 1, 1, 0, -5, 6, 4, 4], V)
-# weights_caret = Vector([-1, -3, 0, 2, -6, -3, 8, 1, 1, 3, -5, 3, 3, -5, -1, 1], CARET)
-# weights_triangle = Vector([0, 0, -1, -5, 2, 7, 5, 0, 3, 2, 1, 2, 0, -2, 2, -3], TRIANGLE)
-
-
-#EXCELLENT GESTURE RECOGNTION
-# weights_swipeRight = Vector([-5, 4, -1, -1, 0, 1, 7, 2, -3, -5, -2, 0, 2, -1, -4, -2], SWIPE_RIGHT)
-# weights_swipeLeft = Vector([4, -4, -1, 1, 0, 0, 1, 0, 2, -2, -2, -1, -2, 2, -1, -3], SWIPE_LEFT)
-# weights_swipeUp = Vector([2, 2, -3, -1, 1, -4, -8, -2, 1, 3, 3, 4, 3, 3, -3, 2], SWIPE_UP)
-# weights_swipeDown = Vector([-1, 0, 3, -1, 4, 0, -1, 0, -2, -2, 4, -5, -6, -3, -2, 1], SWIPE_DOWN)
-# weights_circle = Vector([1, 2, 0, 1, 4, -1, 2, 1, 0, 0, 0, -1, 2, -2, 4, 0], CIRCLE)
-# weights_v = Vector([-2, -1, 2, 1, -4, 0, 2, 0, -1, 0, 0, 0, -3, 5, 3, 3], V)
-# weights_caret = Vector([-2, -4, 0, 1, -6, -1, 8, 1, 1, 3, -3, 1, 5, -4, 0, 1], CARET)
-# weights_triangle = Vector([4, 2, -1, -4, 2, 6, 5, 0, 3, 2, 0, 2, -1, 0, 3, -2], TRIANGLE)
 
 ALL_WEIGHTS = []
 ALL_WEIGHTS.append(weights_swipeRight)

@@ -56,7 +56,7 @@ def get_pos():
     flags, hcursor, (x,y) = win32gui.GetCursorInfo()
     return x, y
 
-movement = 12
+movement = 5
 
 #Code taken from: http://code.activestate.com/lists/python-win32/12702/
 #-------------------------------------------------------------------------------------
@@ -184,8 +184,6 @@ def main():
 def gesture_handling(gesture):
     current_window = GetWindowText(GetForegroundWindow())
     print current_window
-    SendInput(Keyboard(VK_UP))
-#    keyb(VK_UP)
     if current_window != "Avalanche":
         if gesture == SWIPE_RIGHT:
             speech.say("Swiping Right")
@@ -206,22 +204,29 @@ def gesture_handling(gesture):
     else:
         print gestureToText(gesture)
         if gesture == SWIPE_RIGHT:
-            speech.say("Swiping Right")
-
+            SendInput(Keyboard(KEY_D))
+            time.sleep(0.2)
+            SendInput(Keyboard(KEY_D, KEYEVENTF_KEYUP))
         elif gesture == SWIPE_LEFT:
-            speech.say("Swiping Left")
+            SendInput(Keyboard(KEY_A))
+            time.sleep(0.2)
+            SendInput(Keyboard(KEY_A, KEYEVENTF_KEYUP))
         elif gesture == SWIPE_UP:
-            keyb()
-        elif gesture == SWIPE_DOWN:
-            speech.say("Swiping Down")
-        elif gesture == CIRCLE:
-            speech.say("You drew a circle. Whoa!")
-        elif gesture == V:
-            speech.say("You drew a V. So amazing!")
-        elif gesture == CARET:
-            speech.say("You drew a caret. Phenomenal!")
-        elif gesture == TRIANGLE:
-            speech.say("You drew a triangle. Wow!")
+            #speech.say("Swiping Up")
+            print "HERE"
+            SendInput(Keyboard(VK_UP))
+            time.sleep(0.2)
+            SendInput(Keyboard(VK_UP, KEYEVENTF_KEYUP))
+                # elif gesture == SWIPE_DOWN:
+        #     speech.say("Swiping Down")
+        # elif gesture == CIRCLE:
+        #     speech.say("You drew a circle. Whoa!")
+        # elif gesture == V:
+        #     speech.say("You drew a V. So amazing!")
+        # elif gesture == CARET:
+        #     speech.say("You drew a caret. Phenomenal!")
+        # elif gesture == TRIANGLE:
+        #     speech.say("You drew a triangle. Wow!")
 
 
 

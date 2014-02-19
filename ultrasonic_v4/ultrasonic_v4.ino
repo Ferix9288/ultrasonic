@@ -32,7 +32,7 @@
 #define RESILIENCY 1
 
 #define GESTURE_COUNT 50
-#define GESTURE_TIME 1500
+#define GESTURE_TIME 2000
 
 #define NO_MOVEMENT 20
 
@@ -117,7 +117,7 @@ void setup() {
 void loop() {
   int button = digitalRead(BUTTON_SWITCH);
   //Serial.println(button);
-  if (button == 0 && !(pressed) && millis() > 200) {
+  if (button == 0 && !(pressed) && millis() > last_mode+200) {
     pressed = true;
     last_mode = millis();
     changeLED();  
@@ -260,42 +260,34 @@ void gestureRecognition() {
       gesture_counter++;
     }
     
-    //if (difference_time > GESTURE_TIME) { //check after every second
     if (state == OUTSIDE) {    
        outside_counter += 1;
-       
-       //Serial.println("Checking gesture...");
        if (outside_counter > NO_MOVEMENT) {
+         
          if (mode == GAMING_MODE) {
-          state = GESTURE;
-          sensor0_detected = false; 
-          sensor1_detected = false; 
-          sensor2_detected = false;
-          sweep_leftright = false;
-          sweep_rightleft = false;
-          gestureCheck = false;  
-       } else {
-          if (sensor0_detected && sensor1_detected && sensor2_detected) {
-            if (sweep_leftright) {
-              state = SWIPE_RIGHT;
-              //Serial.println("Swept Left...");   
-            } else if (sweep_rightleft) {
-              state = SWIPE_LEFT;
-              //Serial.println("Swept Right...");     
-            }          
-          }
-        }
-        
+              state = GESTURE;
+         } else {
+            if (sensor0_detected && sensor1_detected && sensor2_detected) {
+              if (sweep_leftright) {
+                state = SWIPE_RIGHT;
+                //Serial.println("Swept Left...");   
+              } else if (sweep_rightleft) {
+                state = SWIPE_LEFT;
+                //Serial.println("Swept Right...");     
+              }          
+            }
+         }  
         sensor0_detected = false; 
         sensor1_detected = false; 
         sensor2_detected = false;
         sweep_leftright = false;
         sweep_rightleft = false;
         gestureCheck = false;  
-         }
+      }
       //Serial.println(gestureCheck);
     }
-  } 
+ }
+  
     
 }
 
